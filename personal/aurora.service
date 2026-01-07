@@ -1,6 +1,0 @@
-[Unit]
-Description=Aurora daemon service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/python /home/yyannick/Aurora/daemon.py

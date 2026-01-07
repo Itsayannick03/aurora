@@ -80,11 +80,11 @@ def sas_response():
 def update_handler():
     """Handle user prompts or forced updates based on load and stage."""
     sas_response()
-    if updateable_packages < config.moderate_threshold:
+    if updateable_packages < config.normal_threshold:
         # Minimal load, no update required
         return
 
-    elif updateable_packages < config.high_threshold and config.should_ask_today:
+    elif updateable_packages < config.high_threshold:
         # Moderate to high load, ask user
         valid_responses = ["y", "n"]
         while True:
@@ -133,7 +133,6 @@ if check.returncode != 0:
 else:
     with open("/tmp/aurora.log", "r") as f:
         updateable_packages = int(f.read().strip())
-
 package_count()
 update_handler()
 
