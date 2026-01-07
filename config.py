@@ -17,7 +17,7 @@
 #Let Aurora automatically update your system when packages become critical
 auto_update = True
 
-sync_time = 8
+sync_time = 1
 
 # Thresholds for update stages
 stage0_threshold = 0
