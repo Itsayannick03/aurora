@@ -27,6 +27,7 @@ import os
 import datetime
 import time
 import config
+from pathlib import Path
 
 # ---------------- FILE & STATE ----------------
 script_dir = os.getenv("HOME")+"/.config"
@@ -109,6 +110,23 @@ def update_handler():
 # ---------------- MAIN ----------------
 #Check if pacman-contrib is installed
 check = subprocess.run(["pacman", "-Q", "pacman-contrib"], capture_output=True, text=True)
+
+service = Path("/etc/systemd/system/aurora.service")
+timer = Path("/etc/systemd/system/aurora.timer")
+
+base_dir = Path(__file__).resolve().parent
+
+
+if not service.exists() or not timer.exists():
+    
+    if  subprocess.run(["sudo", "ln", "-s", f"{base_dir}/aurora.service", "/etc/systemd/system/"]).returncode != 0:
+        print("Failed to copy aurora.service into /etc/systemd/system/")
+    if subprocess.run(["sudo", "ln", "-s", f"{base_dir}/aurora.timer", "/etc/systemd/system/"]).returncode != 0:
+        print("Failed to copy aurora.timer into /etc/systemd/system/")
+    if subprocess.run(["systemctl", "daemon-reload"]).returncode != 0:
+        print("Failed reload daemon")
+    if subprocess.run(["systemctl", "enable", "--now", "aurora.timer"]).returncode != 0:
+        print("Failed enable daemon")
 
 if check.returncode != 0:
     print("Aurora:", random.choice(responses.missing_contrib))
