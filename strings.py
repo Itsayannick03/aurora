@@ -12,7 +12,7 @@ Type=oneshot
 ExecStart=/usr/bin/python /home/{user}/Aurora/daemon.py """
 
 timer = f"""[Unit]
-Description=Run Aurora package counter every {str(daemon_timer)} minutes
+Description=Run Aurora package counter every {str(daemon_timer)} seconds
 
 [Timer]
 OnBootSec={str(boot_timer)}s

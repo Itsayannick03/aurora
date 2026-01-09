@@ -7,6 +7,7 @@ import random
 from config import fast_install, install_shell_hook
 from daemon import check_updates
 
+
 ### Definitions ###
 MAX_TRIES = 3
 
@@ -18,20 +19,9 @@ if not fast_install:
     say(greeting)
 
     say("Alright. Let’s set this up properly before you hurt yourself.")
-    # creating the aurora.service file
-    with open("./aurora.service", "w") as f:
-        terminal("creating aurora.service...")
-        sleep(random.uniform(0.5, 5))
-        f.write(service)
-        terminal("aurora.service created.")
-    # Creating the aurora.timer file
-    with open("./aurora.timer", "w") as f:
-        terminal("creating aurora.timer...")
-        sleep(random.uniform(0.5, 5))
-        f.write(timer)
-        terminal("aurora.timer created.")
 
-    say("Service and timer files are ready. Try to keep up.")
+
+    
 
     
 
@@ -70,22 +60,34 @@ if not fast_install:
 
     if not servicePath.exists() or not timerPath.exists():
         say("Installing systemd service.")
-        write(f"sudo ln -s {base_dir}/aurora.service /etc/systemd/system/")
+        write(f'"sudo", "tee", "/etc/systemd/system/aurora.service\n{service}"')
         terminal("installing aurora.service...")
         sleep(random.uniform(0.5, 5))
         try:
-            subprocess.run(["sudo", "ln", "-s", f"{base_dir}/aurora.service", "/etc/systemd/system/"])
+            subprocess.run(
+                ["sudo", "tee", "/etc/systemd/system/aurora.service"],
+                input=service,
+                text=True,
+                stdout=subprocess.DEVNULL,
+                check=True,
+            )
             terminal("aurora.service installed.")
         except Exception as err:
             terminal("Installation failed.")
             terminal(f"Error: {err}")
 
         say("Installing systemd timer.")
-        write(f"sudo ln -s {base_dir}/aurora.timer /etc/systemd/system/")
+        write(f'"sudo", "tee", "/etc/systemd/system/aurora.timer\n{timer}"')
         terminal("installing aurora.timer...")
         sleep(random.uniform(0.5, 5))
         try:
-            subprocess.run(["sudo", "ln", "-s", f"{base_dir}/aurora.timer", "/etc/systemd/system/"])
+            subprocess.run(
+                ["sudo", "tee", "/etc/systemd/system/aurora.timer"],
+                input=timer,
+                text=True,
+                stdout=subprocess.DEVNULL,
+                check=True,
+            )
             terminal("aurora.timer installed.")
         except Exception as err:
             terminal("Installation failed.")
@@ -98,12 +100,12 @@ if not fast_install:
             say("systemd did not cooperate.")
 
         say("Activating Aurora.")
-        say("Relax. If I wanted it, you’d never know.")
+        say("I’ll need your password once more. Relax, If I wanted it, you’d never know.")
         write("systemctl enable --now aurora.timer")
         if subprocess.run(["systemctl", "enable", "--now", "aurora.timer"]).returncode != 0:
             say("Activation failed.")
 
-    say("Good. Everything is running.")
+    say("Service and timer files are ready. Try to keep up.")
 
     say("One last thing. Want Aurora available automatically in your terminal? (y/n)")
 
@@ -224,9 +226,10 @@ else:
                 terminal(f"Failed to add aurora script to bashrc file: {e}")
                 if attempt == MAX_TRIES:
                     raise
-    # Running daemon once
-    check_updates()
+    
     terminal("Instalation complete")
+# Running daemon once
+subprocess.run(["sudo", "systemctl", "start", "aurora.service"])
 
     
 
