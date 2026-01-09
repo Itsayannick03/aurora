@@ -5,7 +5,6 @@ from pathlib import Path
 from time import sleep
 import random
 from config import fast_install, install_shell_hook
-from daemon import check_updates
 
 
 ### Definitions ###
