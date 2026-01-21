@@ -70,11 +70,11 @@ def sas_response():
     elif updateable_packages < config.normal_threshold:
             print("Aurora:", random.choice(responses.stage_1))
     elif updateable_packages < config.moderate_threshold:
-            print("Aurora:", random.choice(responses.stage_2_update))
+            print("Aurora:", random.choice(responses.stage_2))
     elif updateable_packages < config.high_threshold:
-            print("Aurora:", random.choice(responses.stage_3_update))
+            print("Aurora:", random.choice(responses.stage_3))
     elif updateable_packages < config.critical_threshold:
-            print("Aurora:", random.choice(responses.stage_4_update))
+            print("Aurora:", random.choice(responses.stage_4))
     else:
         print("Aurora:", random.choice(responses.stage_5))
     
