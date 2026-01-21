@@ -281,7 +281,7 @@ else:
         for attempt in range(1, MAX_TRIES + 1):
             try:
                 terminal("deleting old aurora.timer file, this might require sudo authentication")
-                subprocess.run(["sudo", "rm", "/etc/systemd/system/aurora.timer"])
+                subprocess.run(["sudo", "rm", timerPath])
                 terminal("deleted aurora.timer")
                 break
             except Exception as e:
