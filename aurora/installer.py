@@ -1,6 +1,6 @@
 import subprocess
 from strings import service, timer, greeting,pacman_hook
-from functions import say, write, terminal, bash
+from functions import say, write, terminal, add_to_bashrc
 from pathlib import Path
 from time import sleep
 import random
@@ -19,8 +19,6 @@ if not fast_install:
     say(greeting)
 
     say("Alright. Let’s set this up properly before you hurt yourself.")
-
-
 
     # Checking for existing service and timer files and removing them if they exist
     if servicePath.exists():
@@ -143,7 +141,7 @@ if not fast_install:
         inpt = input("> ").strip().lower()
         if inpt in valid_responses:
             if inpt == "y":
-                bash()
+                add_to_bashrc()
             break
         else:
             say("Focus. It’s a yes or a no.")
@@ -265,12 +263,12 @@ else:
             terminal(f"Failed to enable aurora timer: {e}")
             if attempt == MAX_TRIES:
                 raise
-    # Writeing aurora into bashrc file
+    # Writing aurora into bashrc file
     if install_shell_hook:
         for attempt in range(1, MAX_TRIES + 1):
             terminal("Adding aurora script to bashrc file")
             try:
-                bash()
+                add_to_bashrc()
                 terminal("Sucessfully added aurora script to bashrc file")
                 break
             except Exception as e:
@@ -278,7 +276,7 @@ else:
                 if attempt == MAX_TRIES:
                     raise
     
-    terminal("Instalation complete")
+    terminal("Installation complete")
 # Running daemon once
 subprocess.run(["systemctl", "--user", "start", "aurora.service"])
 
