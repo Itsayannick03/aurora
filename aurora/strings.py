@@ -13,8 +13,7 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-User={user}
-ExecStart=/usr/bin/python {dir_path}/daemon.py """
+ExecStart=/usr/bin/python3 {dir_path}/daemon.py """
 
 timer = f"""[Unit]
 Description=Run Aurora package counter every {str(daemon_timer)} seconds

@@ -29,10 +29,23 @@ critical_threshold = 200
 atomic_threshold = 500
 nuclear_threshold = 1000
 
-should_ask_today = False
-
 ### Installer options ###
 fast_install = False # Set to true if you want to skip the interactive Aurora install process
 install_shell_hook = False # Set to true if you want Aurora to be installed into your .bashrc file, opening it automatically when opening a terminal. (Recommended)
 daemon_timer = 600 # Daemon timer interval in seconds (default 10 minutes)
 boot_timer = 0 # Daemon on boot timer, how long after boot should timer run (0 seconds by default)
+
+
+### Dependencies ###
+DEPENDENCIES = {
+    "arch": [
+        "python",
+        "pacman",
+        "systemd",
+    ],
+    "ubuntu": [
+        "python3",
+        "apt",
+        "systemd",
+    ],
+}

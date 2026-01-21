@@ -28,19 +28,25 @@ import config
 
 from daemon import check_updates
 
-# ---------------- FILE & STATE ----------------
-script_dir = os.getenv("HOME")+"/.config"
-flag_file = os.path.join(script_dir, ".aurora_update_flag")
-time_flag_file = os.path.join(script_dir, ".aurora_time_flag")
-result_storage_file = os.path.join(script_dir, ".aurora_result_storage_file")
+from functions import get_distro_id, is_arch, is_ubuntu
+
+
+#---------------- FILE PATHS ----------------
+result_storage_file = "/tmp/aurora.log"
 
 # ---------------- FUNCTIONS ----------------
-
 def update():
-    """Run system update via pacman."""
-    subprocess.run(["sudo", "pacman", "-Syu", "--noconfirm"])
-    # after update we check again
-    check_updates()
+    if is_arch():
+        """Run system update via pacman."""
+        subprocess.run(["sudo", "pacman", "-Syu", "--noconfirm"])
+        # after update we check again
+        check_updates()
+    elif is_ubuntu():
+        """Run system update via apt"""
+        subprocess.run(["sudo", "apt", "upgrade"])
+        check_updates()
+    else:
+        raise RuntimeError("Unsupported package manager")
 
 def package_count():
     """Print package count with color according to severity."""
@@ -121,14 +127,6 @@ def handle_flags():
         
 
 # ---------------- MAIN ----------------
-#Check if pacman-contrib is installed
-check = subprocess.run(["pacman", "-Q", "pacman-contrib"], capture_output=True, text=True)
-
-
-if check.returncode != 0:
-    print("Aurora:", random.choice(responses.missing_contrib))
-    exit(1)
-
 handle_flags()    
 
 try:
