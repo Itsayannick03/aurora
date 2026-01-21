@@ -1,5 +1,6 @@
 import subprocess
 from functions import get_distro_id
+from config.paths import *
 
 def check_updates():
     id_, id_like = get_distro_id()
@@ -18,7 +19,7 @@ def check_updates():
     else:
         result = subprocess.run(["checkupdates"], capture_output=True, text=True)
         updateable_packages = str(len(result.stdout.splitlines()))
-    with open("/tmp/aurora.log", "w") as f:
+    with open(log_path, "w") as f:
         f.write(updateable_packages)
 
 if __name__ == "__main__":
