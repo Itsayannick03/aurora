@@ -4,7 +4,7 @@ from functions import say, write, terminal, add_to_bashrc, get_distro_id, is_arc
 from pathlib import Path
 from time import sleep
 import random
-from config import fast_install, install_shell_hook, DEPENDENCIES
+from aurora.settings import fast_install, install_shell_hook, DEPENDENCIES
 import platform
 
 

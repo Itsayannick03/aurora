@@ -1,5 +1,5 @@
 import getpass
-from config import daemon_timer, boot_timer
+from aurora.settings import daemon_timer, boot_timer
 import os 
 
 user = getpass.getuser()
