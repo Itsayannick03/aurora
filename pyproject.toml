@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aurora"
+version = "1.0.0"
+description = "Aurora – A sassy Arch Linux update assistant"
+authors = [{ name = "Yannick Winkler" }]
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+  "rich>=13",
+]
+
+[project.scripts]
+aurora = "aurora.Aurora:main"

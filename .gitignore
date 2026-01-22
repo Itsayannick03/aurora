@@ -2,7 +2,6 @@
 .idea
 *.log
 tmp/
-
 *.py[cod]
 *.egg
 build
@@ -10,3 +9,7 @@ htmlcov
 personal/
 aurora.service
 aurora.timer
+*.egg-info/
+dist/
+build/
+.venv
