@@ -17,19 +17,17 @@
 
 import sys
 sys.path.append("/usr/lib/aurora")
-import responses
-
+from aurora import responses, settings
 import subprocess
 import random
-from rich import print
-import settings as settings
+from rich import print as rprint
 
-from config.paths import log_path
+from aurora.config.paths import log_path
 
 
-from daemon import check_updates
+from aurora.daemon import check_updates
 
-from functions import is_arch, is_ubuntu
+from aurora.functions import is_arch, is_ubuntu
 
 
 #---------------- FILE PATHS ----------------
@@ -38,12 +36,12 @@ from functions import is_arch, is_ubuntu
 def update():
     if is_arch():
         """Run system update via pacman."""
-        subprocess.run(["sudo", "pacman", "-Syu", "--noconfirm"])
+        subprocess.run(["sudo", "pacman", "-Syu", "--noconfirm"], check=True)
         # after update we check again
         check_updates()
     elif is_ubuntu():
         """Run system update via apt"""
-        subprocess.run(["sudo", "apt", "upgrade"])
+        subprocess.run(["sudo", "apt", "upgrade"], check=True)
         check_updates()
     else:
         raise RuntimeError("Unsupported package manager")
@@ -59,25 +57,25 @@ def package_count():
     else:
         color = "dark_red"
 
-    print(f"[{color}]{updateable_packages}[/{color}] packages require attention.")
+    rprint(f"[{color}]{updateable_packages}[/{color}] packages require attention.")
 
 
 def sas_response():
     """Print sassy response according to update stage and whether we ask today."""
-    
+
     if updateable_packages == 0:
-            print("Aurora:", random.choice(responses.stage_0))
+        print("Aurora:", random.choice(responses.stage_0))
     elif updateable_packages < settings.normal_threshold:
-            print("Aurora:", random.choice(responses.stage_1))
+        print("Aurora:", random.choice(responses.stage_1))
     elif updateable_packages < settings.moderate_threshold:
-            print("Aurora:", random.choice(responses.stage_2))
+        print("Aurora:", random.choice(responses.stage_2))
     elif updateable_packages < settings.high_threshold:
-            print("Aurora:", random.choice(responses.stage_3))
+        print("Aurora:", random.choice(responses.stage_3))
     elif updateable_packages < settings.critical_threshold:
-            print("Aurora:", random.choice(responses.stage_4))
+        print("Aurora:", random.choice(responses.stage_4))
     else:
         print("Aurora:", random.choice(responses.stage_5))
-    
+
 
 
 def update_handler():
@@ -96,7 +94,7 @@ def update_handler():
             if inpt in valid_responses:
                 if inpt == "y":
                     update()
-                    with open(log_path, "w") as f:
+                    with open(log_path, "w", encoding="utf-8") as f:
                         f.write("0")
                 break
             else:
@@ -106,7 +104,7 @@ def update_handler():
         # Forced auto-update
         print("Aurora:", random.choice(responses.aurora_auto_update_responses))
         update()
-        with open(log_path, "w") as f:
+        with open(log_path, "w", encoding="utf-8") as f:
             f.write("0")
 
 
@@ -117,25 +115,25 @@ def handle_flags():
         print("  ","--no-update",4*" ","Prevent aurora from asking to, or, auto updating")
         print("  ","--update",7*" ","Will force check updateable package count")
         exit(0)
-        
+
     if "--no-update" in sys.argv:
         settings.ask_update = False
         settings.auto_update = False
 
     if "--update" in sys.argv:
         check_updates()
-        
+
 
 # ---------------- MAIN ----------------
-handle_flags()    
+handle_flags()
 
 try:
-    with open(log_path, "r") as f:        
+    with open(log_path, "r") as f:
         updateable_packages = int(f.read().strip())
 except FileNotFoundError:
     # if the files doesnt exist we create it by updateing it
-    subprocess.run(["systemctl", "--user", "start", "aurora.service"])
-    with open(log_path, "r") as f:        
+    subprocess.run(["systemctl", "--user", "start", "aurora.service"], check=True)
+    with open(log_path, "r") as f:
         updateable_packages = int(f.read().strip())
 
 package_count()

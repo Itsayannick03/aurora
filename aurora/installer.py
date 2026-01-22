@@ -1,12 +1,12 @@
 import subprocess
-from strings import service, timer, greeting,pacman_hook
-from functions import say, write, terminal, add_to_bashrc, get_distro_id, is_arch, is_ubuntu
+from aurora.strings import service, timer, greeting,pacman_hook
+from aurora.functions import say, write, terminal, add_to_bashrc, get_distro_id, is_arch, is_ubuntu
 from pathlib import Path
 from time import sleep
 import random
 from aurora.settings import fast_install, install_shell_hook, DEPENDENCIES
 import platform
-from config.paths import log_path, servicePath, timerPath, pacman_hook_path
+from aurora.config.paths import log_path, servicePath, timerPath, pacman_hook_path
 
 
 ### Definitions ###
@@ -21,65 +21,65 @@ if not fast_install:
     say(greeting)
 
     say("Alright. Let’s set this up properly before you hurt yourself.")
-    
+
     #Compatabilty check
     distro = get_distro_id()[0]
     say("Firstly I need to check what distro you are using.")
-    
+
     ## Some write to find os here !!!!
     os = str(platform.system())
-    
+
     if os.lower() in compatible_os:
         say(f"Ahh {os} perfekt!")
     else:
         say(f"wtf is {os}? I do not support that shit")
-    
+
     say("Now I need to make sure we are compatible")
     distro = str(get_distro_id()[0])
-    
+
     if distro.lower() in compatible_distros:
         say(f"Perfekt! you are using {distro}, you actually did your homework for once")
     else:
         say(f"seriously? {os}, did you even try to read the installation instructions?")
-    
+
     #Dependencies check
     say(f"Now I have to check that you have the right dependencies for {os}:{distro}")
     missing = []
-    
+
     if is_arch():
         say("Since you are using arch, my favorite distro btw, I will have to check that you have the right dependencies")
         dependencies = DEPENDENCIES["arch"]
         for item in dependencies:
-            check = subprocess.run(["pacman", "-Q", item], capture_output=True, text=True)
+            check = subprocess.run(["pacman", "-Q", item], capture_output=True, text=True, check=True)
             if check.returncode == 0:
                 terminal(f"[ OK ] {item}")
             else:
-                terminal(f"[ FAIL ] {item}")   
+                terminal(f"[ FAIL ] {item}")
                 missing.append(item)
-                
+
         if len(missing) > 0:
             for item in missing:
-                subprocess.run(["sudo", "pacman", "-S", item], capture_output=True, text=True)
-    
+                subprocess.run(["sudo", "pacman", "-S", item], capture_output=True, text=True, check=True)
+
     elif is_ubuntu():
         dependencies = DEPENDENCIES["ubuntu"]
         say("Since you are using Ubuntu I’ll check the dependencies myself. Apt likes to say things are fine when they’re not.")
-        
+
         for item in dependencies:
-            check = subprocess.run(["dpkg", "-s", item], capture_output=True, text=True)
+            check = subprocess.run(["dpkg", "-s", item], capture_output=True, text=True, check=True)
             if check.returncode == 0:
                 terminal(f"[ OK ] {item}")
             else:
-                terminal(f"[ FAIL ] {item}")   
+                terminal(f"[ FAIL ] {item}")
                 missing.append(item)
-                
+
         if len(missing) > 0:
             say("You are missing some dependencies, typical humans... Don't worry I'll install them for you")
             for item in missing:
                 write(f"sudo apt install {item}")
-                subprocess.run(["sudo", "apt", "install", item], capture_output=True, text=True)
-           
-    
+                subprocess.run(["sudo", "apt", "install", item], capture_output=True, text=True, check=True)
+
+
     # Checking for existing service and timer files and removing them if they exist
     if servicePath.exists():
         say("Existing service detected. I’ll clean that up.")
@@ -87,7 +87,7 @@ if not fast_install:
         write(f"sudo rm {servicePath}")
         try:
             terminal("removing existing aurora.service...")
-            subprocess.run(["sudo", "rm", servicePath])
+            subprocess.run(["sudo", "rm", servicePath], check=True)
             sleep(random.uniform(0.5, 5))
             terminal("aurora.service removed.")
         except Exception as err:
@@ -99,7 +99,7 @@ if not fast_install:
         write(f"sudo rm {timerPath}")
         try:
             terminal("removing existing aurora.timer...")
-            subprocess.run(["sudo", "rm", timerPath])
+            subprocess.run(["sudo", "rm", timerPath], check=True)
             sleep(random.uniform(0.5, 5))
             terminal("aurora.timer removed.")
         except Exception as err:
@@ -146,13 +146,13 @@ if not fast_install:
         except Exception as err:
             terminal("Installation failed.")
             terminal(f"Error: {err}")
-        
-       
+
+
 
         if is_arch():
             say("One more thing. I’m wiring myself directly into pacman.")
             say("Any time pacman updates itself, I’ll know. Instantly.")
-            
+
             for attempt in range(1, MAX_TRIES + 1):
                 terminal("Installing pacman hook...")
                 try:
@@ -162,7 +162,7 @@ if not fast_install:
                         write("sudo mkdir /etc/pacman.d/hooks")
                         terminal("/etc/pacman.d/hooks path not found")
                         terminal("creating path /etc/pacman.d/hooks")
-                        subprocess.run(["sudo", "mkdir", "/etc/pacman.d/hooks"])
+                        subprocess.run(["sudo", "mkdir", "/etc/pacman.d/hooks"], check=True)
 
                     say("Dropping the hook in place.")
                     write("sudo tee /etc/pacman.d/hooks/aurora-pacman-update.hook")
@@ -186,13 +186,13 @@ if not fast_install:
         say("Refreshing systemd. It likes to be told when things change.")
         say("I’ll need your password for this part. Don’t worry, I’m not interested in it.")
         write("systemctl --user daemon-reload")
-        if subprocess.run(["systemctl", "--user", "daemon-reload"]).returncode != 0:
+        if subprocess.run(["systemctl", "--user", "daemon-reload"], check=True).returncode != 0:
             say("systemd did not cooperate.")
 
         say("Activating Aurora.")
         say("I’ll need your password once more. Relax, If I wanted it, you’d never know.")
         write("systemctl --user enable --now aurora.timer")
-        if subprocess.run(["systemctl", "--user", "enable", "--now", "aurora.timer"]).returncode != 0:
+        if subprocess.run(["systemctl", "--user", "enable", "--now", "aurora.timer"], check=True).returncode != 0:
             say("Activation failed.")
 
     say("Service and timer files are ready. Try to keep up.")
@@ -209,65 +209,65 @@ if not fast_install:
         else:
             say("Focus. It’s a yes or a no question it ain' that hard. y or n.")
     say("That’s it. I’m in place now. I’ll take it from here—try not to make my job harder.")
-    
+
 # Fast install
 else:
     #Compatabilty check
     terminal(":: Checking system compatibility")
-    
+
     os = str(platform.system())
-    
+
     if os.lower() in compatible_os:
         terminal(f"[ OK ] Operating system: {os}")
     else:
         terminal(f"[ FAIL ] Operating system: {os} (unsupported)")
-    
+
     distro = str(get_distro_id()[0])
     if distro.lower() in compatible_distros:
         terminal(f"[ OK ] Distribution: {distro}")
     else:
         terminal(f"[ FAIL ] Distribution: {distro} (unsupported)")
-    
+
     #Dependencies check
     terminal(f":: Checking dependencies for {os}:{distro}")
     missing = []
-    
+
     if is_arch():
         dependencies = DEPENDENCIES["arch"]
         for item in dependencies:
-            check = subprocess.run(["pacman", "-Q", item], capture_output=True, text=True)
+            check = subprocess.run(["pacman", "-Q", item], capture_output=True, text=True, check=True)
             if check.returncode == 0:
                 terminal(f"[ OK ] {item}")
             else:
-                terminal(f"[ FAIL ] {item}")   
+                terminal(f"[ FAIL ] {item}")
                 missing.append(item)
-                
+
         if len(missing) > 0:
             for item in missing:
-                subprocess.run(["sudo", "pacman", "-S", item], capture_output=True, text=True)
-    
+                subprocess.run(["sudo", "pacman", "-S", item], capture_output=True, text=True, check=True)
+
     elif is_ubuntu():
         dependencies = DEPENDENCIES["ubuntu"]
-        
+
         for item in dependencies:
             check = subprocess.run(["dpkg", "-s", item], capture_output=True, text=True)
             if check.returncode == 0:
                 terminal(f"[ OK ] {item}")
             else:
-                terminal(f"[ FAIL ] {item}")   
+                terminal(f"[ FAIL ] {item}")
                 missing.append(item)
-                
+
         if len(missing) > 0:
             for item in missing:
-                subprocess.run(["sudo", "apt", "install", item], capture_output=True, text=True)
-           
-    
+                subprocess.run(["sudo", "apt", "install", item], capture_output=True, text=True, check=True)
+
+
     # Deleting old service file
     if servicePath.exists():
         for attempt in range(1, MAX_TRIES + 1):
             try:
                 terminal("deleting old aurora.service file, this might require sudo authentication")
-                subprocess.run(["sudo", "rm", servicePath])
+                subprocess.run(["sudo", "rm", servicePath], check=True)
                 terminal("deleted aurora.service")
                 break
             except Exception as e:
@@ -279,7 +279,7 @@ else:
         for attempt in range(1, MAX_TRIES + 1):
             try:
                 terminal("deleting old aurora.timer file, this might require sudo authentication")
-                subprocess.run(["sudo", "rm", timerPath])
+                subprocess.run(["sudo", "rm", timerPath], check=True)
                 terminal("deleted aurora.timer")
                 break
             except Exception as e:
@@ -337,11 +337,11 @@ else:
         for attempt in range(1, MAX_TRIES + 1):
             terminal("Installing pacman hook")
             try:
-                # Creating pacman hook folder if it doesn't exist 
+                # Creating pacman hook folder if it doesn't exist
                 if not pacman_hook_path.exists():
                     terminal("/etc/pacman.d/hooks path not found")
                     terminal("creating path /etc/pacman.d/hooks")
-                    subprocess.run(["sudo", "mkdir", "/etc/pacman.d/hooks"])
+                    subprocess.run(["sudo", "mkdir", "/etc/pacman.d/hooks"], check=True)
                 subprocess.run(
                     ["sudo", "tee", "/etc/pacman.d/hooks/aurora-pacman-update.hook"],
                     input=pacman_hook,
@@ -359,7 +359,7 @@ else:
     for attempt in range(1, MAX_TRIES + 1):
         terminal("Reloading daemon services")
         try:
-            subprocess.run(["systemctl", "--user", "daemon-reload"])
+            subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
             terminal("Daemon services sucessfully reloaded")
             break
         except Exception as e:
@@ -370,7 +370,7 @@ else:
     for attemt in range(1, MAX_TRIES + 1):
         terminal("Enableing aurora timer")
         try:
-            subprocess.run(["systemctl", "--user", "enable", "--now", "aurora.timer"])
+            subprocess.run(["systemctl", "--user", "enable", "--now", "aurora.timer"], check=True)
             terminal("aurora timer sucessfully enabled")
             break
         except Exception as e:
@@ -389,11 +389,11 @@ else:
                 terminal(f"Failed to add aurora script to bashrc file: {e}")
                 if attempt == MAX_TRIES:
                     raise
-    
+
     terminal("Installation complete")
 # Running daemon once
-subprocess.run(["systemctl", "--user", "start", "aurora.service"])
+subprocess.run(["systemctl", "--user", "start", "aurora.service"], check=True)
 
-    
+
 
 

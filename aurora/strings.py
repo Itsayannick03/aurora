@@ -1,6 +1,8 @@
+# pylint: disable=missing-module-docstring, invalid-name
+
 import getpass
 from aurora.settings import daemon_timer, boot_timer
-import os 
+import os
 
 user = getpass.getuser()
 

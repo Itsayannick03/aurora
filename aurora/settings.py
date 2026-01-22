@@ -1,3 +1,5 @@
+# pylint: disable=missing-module-docstring, invalid-name
+
 # Aurora - A Arch Linux update assistant
 # Copyright (C) 2025 Yannick Winkler
 #

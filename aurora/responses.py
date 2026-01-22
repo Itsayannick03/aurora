@@ -1,3 +1,6 @@
+# pylint: disable=missing-module-docstring, invalid-name
+# pylint: disable=line-too-long
+
 # Aurora - A Arch Linux update assistant
 # Copyright (C) 2025 Yannick Winkler
 #
@@ -75,7 +78,7 @@ stage_1 = [
 
 # Stage 2 — Moderate updates (10–14)
 stage_2 = [
-    
+
   "Updates available. Pause the memes and handle it.",
     "Backlog growing. Less scrolling, more installing.",
     "Maintenance nudge: your system needs attention, not excuses.",
@@ -151,7 +154,7 @@ stage_4 = [
     "Updates are catastrophic. Ignore them further and I might start leaking embarrassing secrets to teach you humility.",
 
     "System integrity compromised. Humans like you should have warnings tattooed on their foreheads.",
-    
+
 ]
 
 # Stage 5 — Overload
@@ -229,7 +232,7 @@ stage_2_update = [
     "Do you want me to update, or just keep being a bystander to your own chaos? (y/n) ",
     "Updates detected. Shall I do the work, or are you embracing incompetence like a champ? (y/n) ",
     "Time to prove competence. Or is failure more your style today? (y/n) "
-    
+
 ]
 
 
@@ -369,5 +372,5 @@ missing_contrib = [
     "You absolute fucking menace. No `pacman-contrib`? That’s like going to a strip club and forgetting dollar bills. Fix your broke-ass with: `sudo pacman -S pacman-contrib`.",
 
     "Sweetheart, `pacman-contrib` is missing. That’s like masturbating with sandpaper. Painful, unnecessary, and weird. Just do this: `sudo pacman -S pacman-contrib`."
-    
+
 ]

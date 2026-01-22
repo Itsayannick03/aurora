@@ -53,7 +53,7 @@ def add_to_bashrc():
     with open(f"/home/{user}/.bashrc", "a") as f:
         f.write("\n# Aurora shell hook\n")
         f.write(f"python {Path.cwd()}/Aurora.py")
-        
+
 def get_distro_id():
     distro = {}
     with open("/etc/os-release") as f:
