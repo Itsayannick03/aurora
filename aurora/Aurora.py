@@ -131,8 +131,12 @@ def handle_flags():
 handle_flags()    
 
 try:
-    with open(log_path, "r") as f:        
-        updateable_packages = int(f.read().strip())
+    with open(log_path, "r") as f:
+        try:
+            updateable_packages = int(f.read().strip())
+        except ValueError:
+            print("Aurora couldn't fetch updateable packages")
+            exit(0)
 except FileNotFoundError:
     # if the files doesnt exist we create it by updateing it
     subprocess.run(["systemctl", "--user", "start", "aurora.service"])
