@@ -119,7 +119,10 @@ def handle_flags():
         settings.auto_update = False
 
     if "--update" in sys.argv:
-        check_updates()
+        try:
+            check_updates()
+        except:
+            print("Couldnt fetch")
 
 
 def main():
