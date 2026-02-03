@@ -100,7 +100,7 @@ def check_aurora_updates():
             rprint("[bold]Update now? (y/n)[/bold]")
             if input("> ").strip().lower() in ("y", "yes"):
                 if updater.apply_update():
-                    rprint("[green] Updated! Please restart Aurora.[/green]\n")
+                    rprint("[green] Updated! [/green]\n")
                 else:
                     rprint("[red] Update failed. Try manually.[/red]\n")
 

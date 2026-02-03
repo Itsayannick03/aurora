@@ -150,28 +150,5 @@ def main():
     package_count()
     update_handler()
 
-        
-<<<<<<< HEAD:aurora/Aurora.py
-
-# ---------------- MAIN ----------------
-handle_flags()    
-
-# Check for Aurora updates first (if enabled)
-if config.check_aurora_updates:
-    check_aurora_updates()
-
-try:
-    with open("/tmp/aurora.log", "r") as f:        
-        updateable_packages = int(f.read().strip())
-except FileNotFoundError:
-    # if the files doesnt exist we create it by updateing it
-    subprocess.run(["systemctl", "--user", "start", "aurora.service"])
-    with open("/tmp/aurora.log", "r") as f:        
-        updateable_packages = int(f.read().strip())
-
-package_count()
-update_handler()
-=======
 if __name__ == "__main__":
     main()
->>>>>>> b47bb5b168d2516c74ed80a4b12807a7239d3351:aurora/main.py
