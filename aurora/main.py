@@ -1,4 +1,4 @@
-#!/usr/bin/python
+    #!/usr/bin/python
 # Aurora - A Arch Linux update assistant
 # Copyright (C) 2025 Yannick Winkler
 #
@@ -15,46 +15,42 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+# TO RUN python -m aurora.main
+
 import sys
 import os
 sys.path.append("/usr/lib/aurora")
-import responses
+import aurora.responses as responses
+
+from aurora.functions import get_distro
 
 import subprocess
 import random
 from rich import print
-import config
+import aurora.settings as settings
 
+from aurora.config.paths import *
+from aurora.daemon import check_updates
 
-from daemon import check_updates
-from autoupdate import check_aurora_updates
-
-from functions import get_distro_id, is_arch, is_ubuntu
-
-#---------------- FILE PATHS ----------------
-result_storage_file = "/tmp/aurora.log"
+updateable_packages = 0
 
 # ---------------- FUNCTIONS ----------------
 def update():
-    if is_arch():
-        """Run system update via pacman."""
-        subprocess.run(["sudo", "pacman", "-Syu", "--noconfirm"])
-        # after update we check again
-        check_updates()
-    elif is_ubuntu():
-        """Run system update via apt"""
-        subprocess.run(["sudo", "apt", "upgrade"])
-        check_updates()
-    else:
-        raise RuntimeError("Unsupported package manager")
+    distro = get_distro()
+    distro.update()
+    try:
+        distro.check_updates()
+    except Exception as e:
+        print("Couldn't check updates:", e)
+        exit(1)
 
 def package_count():
     """Print package count with color according to severity."""
-    if updateable_packages < config.normal_threshold:
+    if updateable_packages < settings.normal_threshold:
         color = "green"
-    elif updateable_packages < config.moderate_threshold:
+    elif updateable_packages < settings.moderate_threshold:
         color = "yellow"
-    elif updateable_packages < config.high_threshold:
+    elif updateable_packages < settings.high_threshold:
         color = "red"
     else:
         color = "dark_red"
@@ -67,13 +63,13 @@ def sas_response():
     
     if updateable_packages == 0:
             print("Aurora:", random.choice(responses.stage_0))
-    elif updateable_packages < config.normal_threshold:
+    elif updateable_packages < settings.normal_threshold:
             print("Aurora:", random.choice(responses.stage_1))
-    elif updateable_packages < config.moderate_threshold:
+    elif updateable_packages < settings.moderate_threshold:
             print("Aurora:", random.choice(responses.stage_2))
-    elif updateable_packages < config.high_threshold:
+    elif updateable_packages < settings.high_threshold:
             print("Aurora:", random.choice(responses.stage_3))
-    elif updateable_packages < config.critical_threshold:
+    elif updateable_packages < settings.critical_threshold:
             print("Aurora:", random.choice(responses.stage_4))
     else:
         print("Aurora:", random.choice(responses.stage_5))
@@ -83,11 +79,11 @@ def sas_response():
 def update_handler():
     """Handle user prompts or forced updates based on load and stage."""
     sas_response()
-    if updateable_packages < config.normal_threshold:
+    if updateable_packages < settings.normal_threshold:
         # Minimal load, no update required
         return
 
-    elif updateable_packages < config.high_threshold and config.ask_update:
+    elif updateable_packages < settings.high_threshold and settings.ask_update:
         # Moderate to high load, ask user
         valid_responses = ["y", "n"]
         while True:
@@ -96,17 +92,17 @@ def update_handler():
             if inpt in valid_responses:
                 if inpt == "y":
                     update()
-                    with open(result_storage_file, "w") as f:
+                    with open(log_path, "w") as f:
                         f.write("0")
                 break
             else:
                 print("Aurora:", random.choice(responses.invalid_input_responses))
 
-    elif updateable_packages >= config.high_threshold and config.auto_update:
+    elif updateable_packages >= settings.high_threshold and settings.auto_update:
         # Forced auto-update
         print("Aurora:", random.choice(responses.aurora_auto_update_responses))
         update()
-        with open(result_storage_file, "w") as f:
+        with open(log_path, "w") as f:
             f.write("0")
 
 
@@ -119,12 +115,43 @@ def handle_flags():
         exit(0)
         
     if "--no-update" in sys.argv:
-        config.ask_update = False
-        config.auto_update = False
+        settings.ask_update = False
+        settings.auto_update = False
 
     if "--update" in sys.argv:
-        check_updates()
+        try:
+            check_updates()
+        except:
+            print("Couldnt fetch")
+
+
+def main():
+    global updateable_packages
+    # ---------------- MAIN ----------------
+    handle_flags()    
+    try:
+        with open(log_path, "r") as f:
+            try:
+                updateable_packages = int(f.read().strip())
+            except ValueError:
+                print("Aurora couldn't fetch updateable packages")
+                exit(1)
+    except FileNotFoundError:
+        # if the files doesnt exist we create it by updateing it
+        try:
+            updateable_packages = check_updates()
+        except Exception as e:
+            print("Couldn't fetch updates:", e)
+            exit(1)
+        subprocess.run(["systemctl", "--user", "start", "aurora.service"])
+        with open(log_path, "r") as f:        
+            updateable_packages = int(f.read().strip())
+    
+    package_count()
+    update_handler()
+
         
+<<<<<<< HEAD:aurora/Aurora.py
 
 # ---------------- MAIN ----------------
 handle_flags()    
@@ -144,3 +171,7 @@ except FileNotFoundError:
 
 package_count()
 update_handler()
+=======
+if __name__ == "__main__":
+    main()
+>>>>>>> b47bb5b168d2516c74ed80a4b12807a7239d3351:aurora/main.py
