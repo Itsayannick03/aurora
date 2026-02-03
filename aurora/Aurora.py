@@ -27,9 +27,9 @@ import config
 
 
 from daemon import check_updates
+from autoupdate import check_aurora_updates
 
 from functions import get_distro_id, is_arch, is_ubuntu
-
 
 #---------------- FILE PATHS ----------------
 result_storage_file = "/tmp/aurora.log"
@@ -128,6 +128,10 @@ def handle_flags():
 
 # ---------------- MAIN ----------------
 handle_flags()    
+
+# Check for Aurora updates first (if enabled)
+if config.check_aurora_updates:
+    check_aurora_updates()
 
 try:
     with open("/tmp/aurora.log", "r") as f:        
