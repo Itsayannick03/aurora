@@ -22,7 +22,7 @@ ask_update = True
 ### Aurora Update Options ###
 remote = "origin" # Git remote to check for updates
 check_aurora_updates = True # Check for Aurora updates automatically
-ask_aurora_update = True # Ask to apply Aurora updates if check_aurora_updates is enabled
+ask_aurora_update = False # Ask to apply Aurora updates if check_aurora_updates is enabled
 
 sync_time = 1
 
