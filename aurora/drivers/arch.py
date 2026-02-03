@@ -21,7 +21,7 @@ class Archlinux(Driver):
         result = subprocess.run(["checkupdates"], capture_output=True, text=True)
         if result.returncode == 0 or result.returncode == 2:
             return str(len(result.stdout.splitlines()))
-        raise Archlinux.Error(result.stderr)
+        raise Archlinux.Error()
 
     def check_dependencies(self, say=lambda x: None , terminal=lambda x:None):
         missing = []
