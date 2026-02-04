@@ -1,6 +1,5 @@
-import subprocess
 from aurora.functions import get_distro
-from aurora.config.paths import *
+from aurora.config.paths import state_path
 
 def check_updates():
     distro = get_distro()

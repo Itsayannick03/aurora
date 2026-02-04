@@ -1,12 +1,12 @@
 import subprocess
-from aurora.strings import service, timer, greeting,pacman_hook
+from aurora.strings import service, timer, greeting
 from aurora.functions import say, write, terminal, add_to_bashrc, get_distro, get_distro_id
 from pathlib import Path
 from time import sleep
 import random
 from aurora.settings import fast_install, install_shell_hook
 import platform
-from aurora.config.paths import *
+from aurora.config.paths import state_path, servicePath, timerPath
 import sys
 
 ### Definitions ###

@@ -13,7 +13,6 @@ class BaseDriverTest:
 
     def test_check_updates_returns_string(self):
         # We mock subprocess.run to avoid real commands
-        from unittest.mock import patch, MagicMock
         with patch("aurora.drivers.arch.subprocess.run") as mock_run:
             mock_result = MagicMock()
             mock_result.returncode = 0
@@ -24,7 +23,6 @@ class BaseDriverTest:
             assert updates == "3"
 
     def test_check_updates_raises_on_error(self):
-        from unittest.mock import patch, MagicMock
         with patch("aurora.drivers.arch.subprocess.run") as mock_run:
             mock_result = MagicMock()
             mock_result.returncode = 1

@@ -1,7 +1,7 @@
 from .driver import Driver
 import subprocess
 from aurora.strings import pacman_hook
-from aurora.config.paths import *
+from aurora.config.paths import pacman_hook_path
 
 class Archlinux(Driver):
 

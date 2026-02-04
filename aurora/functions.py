@@ -4,7 +4,6 @@ import random
 from pathlib import Path
 from datetime import datetime
 import getpass
-import platform
 from aurora.drivers.ubuntu import Ubuntu
 from aurora.drivers.arch import Archlinux
 
@@ -35,7 +34,7 @@ def say(message):
 def write(message):
     try:
         hostname = Path("/etc/hostname").read_text().strip()
-    except:
+    except OSError:
         hostname = "User"
     pwd = Path.cwd()
     print(f"Aurora@{hostname}:{pwd}$", end=" ")
