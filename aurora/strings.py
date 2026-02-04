@@ -4,16 +4,16 @@ import os
 
 user = getpass.getuser()
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 service = f"""[Unit]
 Description=Aurora daemon service
-Wants=network-online.target
-After=network-online.target
+After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/python3 {dir_path}/daemon.py """
+WorkingDirectory={dir_path}
+ExecStart=/usr/bin/python3 -m aurora.daemon """
 
 timer = f"""[Unit]
 Description=Run Aurora package counter every {str(daemon_timer)} seconds
@@ -35,9 +35,9 @@ Target = pacman
 [Action]
 Description = Running Aurora after pacman upgrade
 When = PostTransaction
-Exec = /usr/bin/python /home/{user}/Aurora/daemon.py
+WorkingDirectory={dir_path}
+ExecStart=/usr/bin/python3 -m aurora.daemon
 """
-
 
 greeting = f"""Hello {user}! I’m Aurora your personal system assistant. Let’s get things running."""
 

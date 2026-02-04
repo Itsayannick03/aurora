@@ -15,38 +15,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+# TO RUN python -m aurora.main
+
 import sys
 sys.path.append("/usr/lib/aurora")
-import responses
+import aurora.responses as responses
+
+from aurora.functions import get_distro
 
 import subprocess
 import random
 from rich import print
-import settings as settings
+import aurora.settings as settings
 
-from config.paths import log_path
+from aurora.config.paths import *
+from aurora.daemon import check_updates
 
-
-from daemon import check_updates
-
-from functions import is_arch, is_ubuntu
-
-
-#---------------- FILE PATHS ----------------
+updateable_packages = 0
 
 # ---------------- FUNCTIONS ----------------
 def update():
-    if is_arch():
-        """Run system update via pacman."""
-        subprocess.run(["sudo", "pacman", "-Syu", "--noconfirm"])
-        # after update we check again
-        check_updates()
-    elif is_ubuntu():
-        """Run system update via apt"""
-        subprocess.run(["sudo", "apt", "upgrade"])
-        check_updates()
-    else:
-        raise RuntimeError("Unsupported package manager")
+    distro = get_distro()
+    distro.update()
+    try:
+        distro.check_updates()
+    except Exception as e:
+        print("Couldn't check updates:", e)
+        exit(1)
 
 def package_count():
     """Print package count with color according to severity."""
@@ -96,7 +91,7 @@ def update_handler():
             if inpt in valid_responses:
                 if inpt == "y":
                     update()
-                    with open(log_path, "w") as f:
+                    with open(state_path, "w") as f:
                         f.write("0")
                 break
             else:
@@ -106,7 +101,7 @@ def update_handler():
         # Forced auto-update
         print("Aurora:", random.choice(responses.aurora_auto_update_responses))
         update()
-        with open(log_path, "w") as f:
+        with open(state_path, "w") as f:
             f.write("0")
 
 
@@ -123,20 +118,37 @@ def handle_flags():
         settings.auto_update = False
 
     if "--update" in sys.argv:
-        check_updates()
+        try:
+            check_updates()
+        except:
+            print("Couldnt fetch")
+
+
+def main():
+    global updateable_packages
+    # ---------------- MAIN ----------------
+    handle_flags()    
+    try:
+        with open(state_path, "r") as f:
+            try:
+                updateable_packages = int(f.read().strip())
+            except ValueError:
+                print("Aurora couldn't fetch updateable packages")
+                exit(1)
+    except FileNotFoundError:
+        # if the files doesnt exist we create it by updateing it
+        try:
+            updateable_packages = check_updates()
+        except Exception as e:
+            print("Couldn't fetch updates:", e)
+            exit(1)
+        subprocess.run(["systemctl", "--user", "start", "aurora.service"])
+        with open(state_path, "r") as f:        
+            updateable_packages = int(f.read().strip())
+    
+    package_count()
+    update_handler()
+
         
-
-# ---------------- MAIN ----------------
-handle_flags()    
-
-try:
-    with open(log_path, "r") as f:        
-        updateable_packages = int(f.read().strip())
-except FileNotFoundError:
-    # if the files doesnt exist we create it by updateing it
-    subprocess.run(["systemctl", "--user", "start", "aurora.service"])
-    with open(log_path, "r") as f:        
-        updateable_packages = int(f.read().strip())
-
-package_count()
-update_handler()
+if __name__ == "__main__":
+    main()
