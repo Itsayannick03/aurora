@@ -19,7 +19,7 @@ class Archlinux(Driver):
 
     def check_updates(self):
         result = subprocess.run(["checkupdates"], capture_output=True, text=True)
-        if result.returncode == 0:
+        if result.returncode == 0 or result.returncode == 2:
             return str(len(result.stdout.splitlines()))
         raise Archlinux.Error()
 

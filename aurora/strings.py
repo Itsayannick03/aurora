@@ -13,7 +13,7 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-Workingdirectory={dir_path}
+WorkingDirectory={dir_path}
 ExecStart=/usr/bin/python3 -m aurora.daemon """
 
 timer = f"""[Unit]
@@ -36,7 +36,7 @@ Target = pacman
 [Action]
 Description = Running Aurora after pacman upgrade
 When = PostTransaction
-Workingdirectory={dir_path}
+WorkingDirectory={dir_path}
 ExecStart=/usr/bin/python3 -m aurora.daemon
 """
 
