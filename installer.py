@@ -1,12 +1,12 @@
 import subprocess
-from aurora.strings import service, timer, greeting,pacman_hook
+from aurora.strings import service, timer, greeting
 from aurora.functions import say, write, terminal, add_to_bashrc, get_distro, get_distro_id
 from pathlib import Path
 from time import sleep
 import random
 from aurora.settings import fast_install, install_shell_hook
 import platform
-from aurora.config.paths import *
+from aurora.config.paths import state_path, servicePath, timerPath
 import sys
 
 ### Definitions ###
@@ -194,11 +194,11 @@ else:
                 if attempt == MAX_TRIES:
                     raise
     # Deleting aurora log
-    if log_path.exists():
+    if state_path.exists():
         for attempt in range(1, MAX_TRIES + 1):
             try:
                 terminal("deleting old aurora.log file, this might require sudo authentication")
-                subprocess.run(["sudo", "rm", log_path], check=True)
+                subprocess.run(["sudo", "rm", state_path], check=True)
                 terminal("succesfully deleted aurora.log")
                 break
             except subprocess.CalledProcessError as e:

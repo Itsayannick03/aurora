@@ -20,11 +20,12 @@ class Ubuntu(Driver):
             stderr=subprocess.DEVNULL,
             text=True
         )
-        if result.returncode == 0:
+        if result.returncode == 0 or result.returncode == 2:
             return str(sum(
                 1 for line in result.stdout.splitlines()
                 if line and not line.startswith("Listing")
             ))
+
         raise Ubuntu.Error()
 
     def check_dependencies(self,say=lambda x: None, terminal=lambda x: None, write=lambda x: None):

@@ -18,7 +18,6 @@
 # TO RUN python -m aurora.main
 
 import sys
-import os
 sys.path.append("/usr/lib/aurora")
 import aurora.responses as responses
 
@@ -29,7 +28,7 @@ import random
 from rich import print
 import aurora.settings as settings
 
-from aurora.config.paths import *
+from aurora.config.paths import state_path
 from aurora.daemon import check_updates
 
 updateable_packages = 0
@@ -92,7 +91,7 @@ def update_handler():
             if inpt in valid_responses:
                 if inpt == "y":
                     update()
-                    with open(log_path, "w") as f:
+                    with open(state_path, "w") as f:
                         f.write("0")
                 break
             else:
@@ -102,7 +101,7 @@ def update_handler():
         # Forced auto-update
         print("Aurora:", random.choice(responses.aurora_auto_update_responses))
         update()
-        with open(log_path, "w") as f:
+        with open(state_path, "w") as f:
             f.write("0")
 
 
@@ -121,7 +120,7 @@ def handle_flags():
     if "--update" in sys.argv:
         try:
             check_updates()
-        except:
+        except OSError:
             print("Couldnt fetch")
 
 
@@ -130,7 +129,7 @@ def main():
     # ---------------- MAIN ----------------
     handle_flags()    
     try:
-        with open(log_path, "r") as f:
+        with open(state_path, "r") as f:
             try:
                 updateable_packages = int(f.read().strip())
             except ValueError:
@@ -144,7 +143,7 @@ def main():
             print("Couldn't fetch updates:", e)
             exit(1)
         subprocess.run(["systemctl", "--user", "start", "aurora.service"])
-        with open(log_path, "r") as f:        
+        with open(state_path, "r") as f:        
             updateable_packages = int(f.read().strip())
     
     package_count()

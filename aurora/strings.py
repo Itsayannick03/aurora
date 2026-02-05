@@ -8,12 +8,11 @@ dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 service = f"""[Unit]
 Description=Aurora daemon service
-Wants=network-online.target
-After=network-online.target
+After=network.target
 
 [Service]
 Type=oneshot
-Workingdirectory={dir_path}
+WorkingDirectory={dir_path}
 ExecStart=/usr/bin/python3 -m aurora.daemon """
 
 timer = f"""[Unit]
@@ -36,7 +35,7 @@ Target = pacman
 [Action]
 Description = Running Aurora after pacman upgrade
 When = PostTransaction
-Workingdirectory={dir_path}
+WorkingDirectory={dir_path}
 ExecStart=/usr/bin/python3 -m aurora.daemon
 """
 
