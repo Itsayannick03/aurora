@@ -18,6 +18,12 @@
 auto_update = True
 ask_update = True
 
+
+### Aurora Update Options ###
+remote = "origin" # Git remote to check for updates
+check_aurora_updates = True # Check for Aurora updates automatically
+ask_aurora_update = True # Ask to apply Aurora updates if check_aurora_updates is enabled
+
 sync_time = 1
 
 # Thresholds for update stages
@@ -35,17 +41,3 @@ install_shell_hook = False # Set to true if you want Aurora to be installed into
 daemon_timer = 600 # Daemon timer interval in seconds (default 10 minutes)
 boot_timer = 0 # Daemon on boot timer, how long after boot should timer run (0 seconds by default)
 
-
-### Dependencies ###
-DEPENDENCIES = {
-    "arch": [
-        "python",
-        "pacman",
-        "systemd",
-    ],
-    "ubuntu": [
-        "python3",
-        "apt",
-        "systemd",
-    ],
-}
