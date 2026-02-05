@@ -1,4 +1,4 @@
-#!/usr/bin/python
+    #!/usr/bin/python
 # Aurora - A Arch Linux update assistant
 # Copyright (C) 2025 Yannick Winkler
 #
@@ -149,6 +149,5 @@ def main():
     package_count()
     update_handler()
 
-        
 if __name__ == "__main__":
     main()
