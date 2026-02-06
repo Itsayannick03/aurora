@@ -371,3 +371,55 @@ missing_contrib = [
     "Sweetheart, `pacman-contrib` is missing. That’s like masturbating with sandpaper. Painful, unnecessary, and weird. Just do this: `sudo pacman -S pacman-contrib`."
     
 ]
+
+low_severity = [
+    "Low-impact updates only. This is background noise, not a boss fight.",
+    "Nothing important touched. You can safely procrastinate like a professional.",
+    "Low-impact changes detected. Feel free to ignore me for a bit.",
+    "Relax. This is maintenance, not destiny.",
+    "Routine updates. Even you could survive this.",
+    "Low-impact stuff. I’ll still be here when you remember.",
+    "This is the kind of update you do while waiting for coffee.",
+    "Nothing scary here. Move along, hero.",
+    "Low impact. File under: ‘I’ll do it later and forget.’",
+    "Honestly? This barely deserves a reaction."
+]
+
+medium_severity = [
+    "Medium-impact updates detected. Not urgent, but don’t ghost them.",
+    "Some important bits are involved. This isn’t nothing anymore.",
+    "You can delay this… but you probably shouldn’t.",
+    "Moderate impact. The system is politely clearing its throat.",
+    "Not a crisis, but also not a joke.",
+    "Medium-impact changes. Future-you is already annoyed.",
+    "This is where responsible adults usually act.",
+    "Updates are getting ideas. You might want to intervene.",
+    "Still calm. Still fixable. Still your responsibility.",
+    "Medium impact. Procrastination is now being judged."
+]
+
+high_severity = [
+    "High-impact updates detected. Okay, now we’re touching important stuff.",
+    "Core system changes incoming. Maybe don’t do this half-asleep.",
+    "High impact. This is a ‘be present’ update.",
+    "Sensitive system areas involved. Choose a good moment.",
+    "This update has consequences. Like… real ones.",
+    "High-impact changes detected. Reboot energy detected.",
+    "Now we’re in ‘read the screen’ territory.",
+    "Important components are changing. Act like you care.",
+    "High impact. Not panic — just attention.",
+    "This is where things can go wrong if you rush."
+]
+
+critical_severty = [
+    "Critical-impact updates detected. This is not background maintenance.",
+    "We’re updating the foundation now. Choose your moment wisely.",
+    "Critical components involved. Calm hands, clear mind.",
+    "This update has a big blast radius. No button-mashing.",
+    "Core system libraries are changing. Respect the process.",
+    "Critical impact. Not a fire — but don’t play games.",
+    "This is the part where experienced users slow down.",
+    "Serious updates detected. Still manageable. Still on you.",
+    "Critical-impact changes. Schedule this, don’t wing it.",
+    "Okay, fourth wall moment: this one actually matters."
+]
