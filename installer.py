@@ -10,7 +10,6 @@ from aurora.config.paths import state_path, servicePath, timerPath, symlink_path
 import sys
 import getpass
 
-
 ### Definitions ###
 MAX_TRIES = 3
 
@@ -34,70 +33,68 @@ disto = get_distro()
 if not fast_install:
     say(greeting)
 
-    say("Alright. Let’s set this up properly before you hurt yourself.")
-    
-    #Compatabilty check
-    distro = get_distro_id()[0]
-    say("Firstly I need to check what distro you are using.")
-    
-    ## Some write to find os here !!!!
-    os = str(platform.system())
-    
-    if os.lower() in compatible_os:
-        say(f"Ahh {os} perfekt!")
-    else:
-        say(f"wtf is {os}? I do not support that shit")
-    
-    say("Now I need to make sure we are compatible")
-    distro = str(get_distro_id()[0])
-    
-    if distro.lower() in compatible_distros:
-        say(f"Perfekt! you are using {distro}, you actually did your homework for once")
-    else:
-        say(f"seriously? {os}, did you even try to read the installation instructions?")
-    
-    #Dependencies check
-    say(f"Now I have to check that you have the right dependencies for {os}:{distro}")
+    say(":: Preparing Aurora installation")
 
-    disto.check_dependencies(say,terminal)
-    
-    # Checking for existing service and timer files and removing them if they exist
+    distro = get_distro_id()[0]
+    say(":: Detecting operating system")
+
+    os = str(platform.system())
+
+    if os.lower() in compatible_os:
+        say(f":: Operating system detected: {os}")
+    else:
+        say(f":: Unsupported operating system: {os}")
+
+    say(":: Detecting Linux distribution")
+
+    distro = str(get_distro_id()[0])
+
+    if distro.lower() in compatible_distros:
+        say(f":: Distribution detected: {distro}")
+    else:
+        say(f":: Unsupported distribution: {distro}")
+
+    say(f":: Checking dependencies for {os}:{distro}")
+
+    disto.check_dependencies(say, terminal)
+
     if servicePath.exists():
-        say("Existing service detected. I’ll clean that up.")
-        say("This might ask for your password. Depends on how recently you proved you’re allowed to do things.")
+        say(":: Existing aurora.service detected")
         write(f"sudo rm {servicePath}")
         try:
-            terminal("removing existing aurora.service...")
+            terminal(":: Removing aurora.service")
             subprocess.run(["sudo", "rm", servicePath])
             sleep(random.uniform(0.5, 5))
-            terminal("aurora.service removed.")
+            terminal(":: aurora.service removed")
         except Exception as err:
-            terminal("Task failed.")
-            terminal(f"Error: {err}")
+            terminal(":: Task failed")
+            terminal(f":: Error: {err}")
 
     if timerPath.exists():
-        say("Existing timer detected. Same fate.")
+        say(":: Existing aurora.timer detected")
         write(f"sudo rm {timerPath}")
         try:
-            terminal("removing existing aurora.timer...")
+            terminal(":: Removing aurora.timer")
             subprocess.run(["sudo", "rm", timerPath])
             sleep(random.uniform(0.5, 5))
-            terminal("aurora.timer removed.")
+            terminal(":: aurora.timer removed")
         except Exception as err:
-            terminal("Task failed.")
-            terminal(f"Error: {err}")
+            terminal(":: Task failed")
+            terminal(f":: Error: {err}")
 
-    say("Old files cleared. As expected.")
+    say(":: Old files cleared")
 
     base_dir = Path(__file__).resolve().parent
 
-    say("Now we put the new pieces where they belong.")
+    say(":: Installing system components")
 
     if not servicePath.exists() or not timerPath.exists():
-        say("Installing systemd service.")
+
+        say(":: Installing aurora.service")
         write(f'"sudo", "tee", "{servicePath}\n{service}"')
-        terminal("installing aurora.service...")
+        terminal(":: Installing aurora.service")
         sleep(random.uniform(0.5, 5))
+
         try:
             subprocess.run(
                 ["sudo", "tee", servicePath],
@@ -106,15 +103,16 @@ if not fast_install:
                 stdout=subprocess.DEVNULL,
                 check=True,
             )
-            terminal("aurora.service installed.")
+            terminal(":: aurora.service installed")
         except Exception as err:
-            terminal("Installation failed.")
-            terminal(f"Error: {err}")
+            terminal(":: Installation failed")
+            terminal(f":: Error: {err}")
 
-        say("Installing systemd timer.")
+        say(":: Installing aurora.timer")
         write(f'"sudo", "tee", "{timerPath}\n{timer}"')
-        terminal("installing aurora.timer...")
+        terminal(":: Installing aurora.timer")
         sleep(random.uniform(0.5, 5))
+
         try:
             subprocess.run(
                 ["sudo", "tee", timerPath],
@@ -123,129 +121,130 @@ if not fast_install:
                 stdout=subprocess.DEVNULL,
                 check=True,
             )
-            terminal("aurora.timer installed.")
+            terminal(":: aurora.timer installed")
         except Exception as err:
-            terminal("Installation failed.")
-            terminal(f"Error: {err}")
+            terminal(":: Installation failed")
+            terminal(f":: Error: {err}")
 
-        disto.install_hook(write,MAX_TRIES,say,terminal)
-            
-        say("Refreshing systemd. It likes to be told when things change.")
-        say("I’ll need your password for this part. Don’t worry, I’m not interested in it.")
+        disto.install_hook(write, MAX_TRIES, say, terminal)
+
+        say(":: Reloading systemd user daemon")
         write("systemctl --user daemon-reload")
+
         if subprocess.run(["systemctl", "--user", "daemon-reload"]).returncode != 0:
-            say("systemd did not cooperate.")
+            say(":: systemd reload failed")
 
-        say("Activating Aurora.")
-        say("I’ll need your password once more. Relax, If I wanted it, you’d never know.")
+        say(":: Enabling aurora timer")
         write("systemctl --user enable --now aurora.timer")
-        if subprocess.run(["systemctl", "--user", "enable", "--now", "aurora.timer"]).returncode != 0:
-            say("Activation failed.")
 
-    say("Service and timer files are ready. Try to keep up.")
-    
-    say("Now do you want to add a command symlink?")
-    say("In case you don't know what that means, which I doubt considering your on Linux, it means that you can run aurora from everywhere")
-    say("Should I add it?(Y/n)")
-    
-    if input("> ").lower() not in no_input:
-        
+        if subprocess.run(["systemctl", "--user", "enable", "--now", "aurora.timer"]).returncode != 0:
+            say(":: Timer activation failed")
+
+    say(":: Service and timer setup complete")
+
+    say(":: Install command symlink so 'aurora' can be run globally? [Y/n]")
+
+    if input(":: ").strip().lower() not in no_input:
+
         aurora_main_path = Path.cwd() / "Aurora.py"
-        
+
         if symlink_path.exists():
-            say("Apperantly you already have a command symlink")
-            say("Should we reinstall it?(Y/n)")
-            
-            if input(">").lower() not in no_input:
+            say(":: Existing symlink detected. Reinstall it? [y/N]")
+
+            if input(":: ").strip().lower() in yes_input:
+
                 write(f"sudo rm -rf {symlink_path}")
                 subprocess.run(["sudo", "rm", "-rf", symlink_path])
-                terminal(f"{symlink_path} deleted")
-                
-                say("Now lets add the new symlink")
+                terminal(f":: {symlink_path} removed")
+
+                say(":: Creating new symlink")
                 write(f"sudo ln -s {aurora_main_path} {symlink_path}")
                 subprocess.run(["sudo", "ln", "-s", aurora_main_path, symlink_path])
-                terminal("Symlink sucesfully added")
+                terminal(":: Symlink installed")
+
         else:
-            say("Lets add the symlink")
+            say(":: Creating symlink")
             write(f"sudo ln -s {aurora_main_path} {symlink_path}")
             subprocess.run(["sudo", "ln", "-s", aurora_main_path, symlink_path])
-            terminal("Symlink sucesfully added")
+            terminal(":: Symlink installed")
 
-    say("One last thing. Want Aurora available automatically in your terminal? (y/n)")
+    say(":: Add Aurora to your shell startup (.bashrc)? [y/N]")
 
-    
     while True:
-        inpt = input("> ").strip().lower()
+        inpt = input(":: ").strip().lower()
+
         if inpt in valid_responses:
-            if inpt == "y" or inpt == "yes":
+            if inpt in yes_input:
                 add_to_bashrc()
             break
         else:
-            say("Focus. It’s a yes or a no question it ain' that hard. y or n.")
-    say("That’s it. I’m in place now. I’ll take it from here—try not to make my job harder.")
-    
+            say(":: Please answer y or n")
+
+    say(":: Installation complete")
+
 # Fast install
 else:
-    #Compatabilty check
+
     terminal(":: Checking system compatibility")
-    
+
     os = str(platform.system())
-    
+
     if os.lower() in compatible_os:
         terminal(f"[ OK ] Operating system: {os}")
     else:
         terminal(f"[ FAIL ] Operating system: {os} (unsupported)")
-            
+        sys.exit(1)
+
     distro = str(get_distro_id()[0])
+
     if distro.lower() in compatible_distros:
         terminal(f"[ OK ] Distribution: {distro}")
     else:
         terminal(f"[ FAIL ] Distribution: {distro} (unsupported)")
-    
-    #Dependencies check
+
     terminal(f":: Checking dependencies for {os}:{distro}")
+
     disto.check_dependencies(terminal=terminal)
-    
-    # Deleting old service file
+
     if servicePath.exists():
         for attempt in range(1, MAX_TRIES + 1):
             try:
-                terminal("deleting old aurora.service file, this might require sudo authentication")
+                terminal(":: Removing old aurora.service")
                 subprocess.run(["sudo", "rm", servicePath])
-                terminal("deleted aurora.service")
+                terminal(":: aurora.service removed")
                 break
             except Exception as e:
                 terminal(f"Attempt {attempt} failed: {e}")
                 if attempt == MAX_TRIES:
                     raise
-    # Deleting old timer files
+
     if timerPath.exists():
         for attempt in range(1, MAX_TRIES + 1):
             try:
-                terminal("deleting old aurora.timer file, this might require sudo authentication")
+                terminal(":: Removing old aurora.timer")
                 subprocess.run(["sudo", "rm", timerPath])
-                terminal("deleted aurora.timer")
+                terminal(":: aurora.timer removed")
                 break
             except Exception as e:
                 terminal(f"Attempt {attempt} failed: {e}")
                 if attempt == MAX_TRIES:
                     raise
-    # Deleting aurora log
+
     if state_path.exists():
         for attempt in range(1, MAX_TRIES + 1):
             try:
-                terminal("deleting old aurora.log file, this might require sudo authentication")
+                terminal(":: Removing old aurora.log")
                 subprocess.run(["sudo", "rm", state_path], check=True)
-                terminal("succesfully deleted aurora.log")
+                terminal(":: aurora.log removed")
                 break
             except subprocess.CalledProcessError as e:
                 terminal(f"Attempt {attempt} failed: {e}")
                 if attempt == MAX_TRIES:
                     raise
-    # Installing service file
+
     for attempt in range(1, MAX_TRIES + 1):
         try:
-            terminal("Installing service file")
+            terminal(":: Installing service file")
             subprocess.run(
                 ["sudo", "tee", servicePath],
                 input=service,
@@ -253,16 +252,16 @@ else:
                 stdout=subprocess.DEVNULL,
                 check=True,
             )
-            terminal("service file sucefsfully installed")
+            terminal(":: Service file installed")
             break
         except Exception as e:
             terminal(f"Installation failed: {e}")
             if attempt == MAX_TRIES:
                 raise
-    # Installing timer file
+
     for attempt in range(1, MAX_TRIES + 1):
         try:
-            terminal("Installing timer file")
+            terminal(":: Installing timer file")
             subprocess.run(
                 ["sudo", "tee", timerPath],
                 input=timer,
@@ -270,79 +269,80 @@ else:
                 stdout=subprocess.DEVNULL,
                 check=True,
             )
-            terminal("timer file sucefsfully installed")
+            terminal(":: Timer file installed")
             break
         except Exception as e:
             terminal(f"Installation failed: {e}")
             if attempt == MAX_TRIES:
                 raise
 
-    # TODO MAKE IT MORE SILENT
-    disto.install_hook(write,MAX_TRIES,terminal=terminal)
-    
-    # Reloading daemon
+    disto.install_hook(write, MAX_TRIES, terminal=terminal)
+
     for attempt in range(1, MAX_TRIES + 1):
-        terminal("Reloading daemon services")
+        terminal(":: Reloading daemon services")
+
         try:
             subprocess.run(["systemctl", "--user", "daemon-reload"])
-            terminal("Daemon services sucessfully reloaded")
+            terminal(":: Daemon reloaded")
             break
         except Exception as e:
-            terminal(f"Failed to reload daemon services: {e}")
+            terminal(f"Failed to reload daemon: {e}")
             if attempt == MAX_TRIES:
                 raise
-    # enableing aurora timer
-    for attemt in range(1, MAX_TRIES + 1):
-        terminal("Enableing aurora timer")
+
+    for attempt in range(1, MAX_TRIES + 1):
+        terminal(":: Enabling aurora timer")
+
         try:
             subprocess.run(["systemctl", "--user", "enable", "--now", "aurora.timer"])
-            terminal("aurora timer sucessfully enabled")
+            terminal(":: Timer enabled")
             break
         except Exception as e:
-            terminal(f"Failed to enable aurora timer: {e}")
+            terminal(f"Failed to enable timer: {e}")
             if attempt == MAX_TRIES:
                 raise
-    # Writing aurora into bashrc file
+
     terminal(":: Add Aurora to your .bashrc so it loads automatically? [y/N]")
+
     response = input(":: ").strip().lower()
+
     if response in yes_input:
+
         for attempt in range(1, MAX_TRIES + 1):
-            terminal("Adding aurora script to bashrc file")
+            terminal(":: Updating .bashrc")
+
             try:
                 add_to_bashrc()
-                terminal("Sucessfully added aurora script to bashrc file")
+                terminal(":: .bashrc updated")
                 break
             except Exception as e:
-                terminal(f"Failed to add aurora script to bashrc file: {e}")
+                terminal(f"Failed to update .bashrc: {e}")
                 if attempt == MAX_TRIES:
                     raise
+
     if install_command_symlink:
-        
-        terminal("Adding command symlink...")
+
+        terminal(":: Installing command symlink")
+
         aurora_main_path = Path.cwd() / "Aurora.py"
-        
+
         if symlink_path.exists():
-            terminal("symlink path already in use. Would you like to reinstall it?(y/N)")
-            
-            valid_responses = ["y", "yes"]
-            if input(">").lower() in valid_responses:
+
+            terminal(":: Existing symlink detected. Reinstall it? [y/N]")
+
+            if input(":: ").strip().lower() in yes_input:
                 subprocess.run(["sudo", "rm", "-rf", symlink_path])
-                terminal(f"{symlink_path} deleted")
-                
-                terminal("Adding symlink...")
+                terminal(f":: {symlink_path} removed")
+
+                terminal(":: Creating new symlink")
                 subprocess.run(["sudo", "ln", "-s", aurora_main_path, symlink_path])
+
         else:
-            terminal("Adding symlink...")
+            terminal(":: Creating symlink")
             subprocess.run(["sudo", "ln", "-s", aurora_main_path, symlink_path])
-            terminal("Symlink added")
-            
-                
-    
-    
-    terminal("Installation complete")
+            terminal(":: Symlink installed")
+
+    terminal(":: Installation complete")
+
 # Running daemon once
 subprocess.run(["systemctl", "--user", "start", "aurora.service"])
-
-    
-
-

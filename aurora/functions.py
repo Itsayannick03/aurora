@@ -54,7 +54,7 @@ def write(message):
 
 def terminal(msg):
     ts = datetime.now().strftime("%H:%M:%S")
-    print(f"({ts}) {msg}")
+    print(f"{msg}")
     sleep(0.4)
 
 def add_to_bashrc():
