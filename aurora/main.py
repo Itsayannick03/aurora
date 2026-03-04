@@ -108,6 +108,8 @@ def update_handler():
 
 
 def handle_flags():
+    valid_args = ["--help", "-h", "status", "--no-update", "--update"]
+    
     if "--help" in sys.argv or "-h" in sys.argv:
         print("aurora","[--options]","[--actions]")
         print("-h","--help",9*" ","Print this message")
@@ -131,6 +133,9 @@ def handle_flags():
         except OSError:
             print("Couldnt fetch")
             
+    elif len(sys.argv) > 1:
+        print(f"Aurora: '{str(sys.argv[1])}' is not a valid command. See 'aurora --help'")
+        exit(1)      
      
 
 def main():
