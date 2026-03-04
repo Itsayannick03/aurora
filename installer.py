@@ -4,10 +4,12 @@ from aurora.functions import say, write, terminal, add_to_bashrc, get_distro, ge
 from pathlib import Path
 from time import sleep
 import random
-from aurora.settings import fast_install, install_shell_hook
+from aurora.settings import fast_install, install_shell_hook, install_command_symlink
 import platform
-from aurora.config.paths import state_path, servicePath, timerPath
+from aurora.config.paths import state_path, servicePath, timerPath, symlink_path
 import sys
+import getpass
+
 
 ### Definitions ###
 MAX_TRIES = 3
@@ -17,6 +19,9 @@ if "--fast" in sys.argv:
 
 compatible_os = ["linux"]
 compatible_distros = ["arch", "ubuntu"]
+
+# get user
+user = getpass.getuser()
 
 # get current distro
 disto = get_distro()
@@ -277,6 +282,29 @@ else:
                 terminal(f"Failed to add aurora script to bashrc file: {e}")
                 if attempt == MAX_TRIES:
                     raise
+    if install_command_symlink:
+        
+        terminal("Adding command symlink...")
+        aurora_main_path = Path.cwd() / "Aurora.py"
+        print(aurora_main_path)
+        # sudo ln -s /home/spy/Aurora/Aurora.py /usr/local/bin/aurora
+        if symlink_path.exists():
+            terminal("symlink path already in use. Would you like to reinstall it?(y/N)")
+            
+            valid_responses = ["y", "yes"]
+            if input(">").lower() in valid_responses:
+                subprocess.run(["sudo", "rm", "-rf", symlink_path])
+                terminal(f"{symlink_path} deleted")
+                
+                terminal("Adding symlink...")
+                subprocess.run(["sudo", "ln", "-s", aurora_main_path, symlink_path])
+        else:
+            terminal("Adding symlink...")
+            subprocess.run(["sudo", "ln", "-s", aurora_main_path, symlink_path])
+            terminal("Symlink added")
+            
+                
+    
     
     terminal("Installation complete")
 # Running daemon once
