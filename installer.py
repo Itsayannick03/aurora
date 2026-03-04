@@ -20,6 +20,11 @@ if "--fast" in sys.argv:
 compatible_os = ["linux"]
 compatible_distros = ["arch", "ubuntu"]
 
+valid_responses = ["y", "n", "yes", "no"]
+
+yes_input = ["y", "yes"]
+no_input = ["n", "no"]
+
 # get user
 user = getpass.getuser()
 
@@ -138,10 +143,37 @@ if not fast_install:
             say("Activation failed.")
 
     say("Service and timer files are ready. Try to keep up.")
+    
+    say("Now do you want to add a command symlink?")
+    say("In case you don't know what that means, which I doubt considering your on Linux, it means that you can run aurora from everywhere")
+    say("Should I add it?(Y/n)")
+    
+    if input("> ").lower() not in no_input:
+        
+        aurora_main_path = Path.cwd() / "Aurora.py"
+        
+        if symlink_path.exists():
+            say("Apperantly you already have a command symlink")
+            say("Should we reinstall it?(Y/n)")
+            
+            if input(">").lower() not in no_input:
+                write(f"sudo rm -rf {symlink_path}")
+                subprocess.run(["sudo", "rm", "-rf", symlink_path])
+                terminal(f"{symlink_path} deleted")
+                
+                say("Now lets add the new symlink")
+                write(f"sudo ln -s {aurora_main_path} {symlink_path}")
+                subprocess.run(["sudo", "ln", "-s", aurora_main_path, symlink_path])
+                terminal("Symlink sucesfully added")
+        else:
+            say("Lets add the symlink")
+            write(f"sudo ln -s {aurora_main_path} {symlink_path}")
+            subprocess.run(["sudo", "ln", "-s", aurora_main_path, symlink_path])
+            terminal("Symlink sucesfully added")
 
     say("One last thing. Want Aurora available automatically in your terminal? (y/n)")
 
-    valid_responses = ["y", "n", "yes", "no"]
+    
     while True:
         inpt = input("> ").strip().lower()
         if inpt in valid_responses:
@@ -163,7 +195,7 @@ else:
         terminal(f"[ OK ] Operating system: {os}")
     else:
         terminal(f"[ FAIL ] Operating system: {os} (unsupported)")
-    
+            
     distro = str(get_distro_id()[0])
     if distro.lower() in compatible_distros:
         terminal(f"[ OK ] Distribution: {distro}")
@@ -271,7 +303,9 @@ else:
             if attempt == MAX_TRIES:
                 raise
     # Writing aurora into bashrc file
-    if install_shell_hook:
+    terminal(":: Add Aurora to your .bashrc so it loads automatically? [y/N]")
+    response = input(":: ").strip().lower()
+    if response in yes_input:
         for attempt in range(1, MAX_TRIES + 1):
             terminal("Adding aurora script to bashrc file")
             try:
@@ -286,8 +320,7 @@ else:
         
         terminal("Adding command symlink...")
         aurora_main_path = Path.cwd() / "Aurora.py"
-        print(aurora_main_path)
-        # sudo ln -s /home/spy/Aurora/Aurora.py /usr/local/bin/aurora
+        
         if symlink_path.exists():
             terminal("symlink path already in use. Would you like to reinstall it?(y/N)")
             
