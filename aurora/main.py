@@ -39,6 +39,7 @@ is_updating = False
 # ---------------- FUNCTIONS ----------------
 def update():
     global updateable_packages
+    global is_updating
     distro = get_distro()
 
     is_updating = True
