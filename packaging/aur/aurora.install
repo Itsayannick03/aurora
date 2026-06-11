@@ -1,0 +1,32 @@
+post_install() {
+  cat <<EOF
+
+Aurora has been installed.
+
+To enable Aurora's user timer, run:
+
+  systemctl --user daemon-reload
+  systemctl --user enable --now aurora.timer
+
+To run Aurora once manually:
+
+  systemctl --user start aurora.service
+
+EOF
+}
+
+post_upgrade() {
+  cat <<EOF
+
+Aurora has been upgraded.
+
+You may want to reload user systemd units:
+
+  systemctl --user daemon-reload
+
+EOF
+}
+
+pre_remove() {
+  systemctl --user disable --now aurora.timer 2>/dev/null || true
+}
