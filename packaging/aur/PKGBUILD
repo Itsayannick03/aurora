@@ -9,7 +9,9 @@ url="https://github.com/Itsayannick03/aurora"
 license=('GPL-3')
 depends=(
   'python'
+  'python-rich'
   'systemd'
+  'pacman-contrib'
 )
 makedepends=(
   'python-build'
