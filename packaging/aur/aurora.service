@@ -1,0 +1,7 @@
+[Unit]
+Description=Aurora daemon service
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python -m aurora.daemon

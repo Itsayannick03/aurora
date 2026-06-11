@@ -8,8 +8,7 @@ tmp/
 build
 htmlcov
 personal/
-aurora.service
-aurora.timer
+
 aurora.egg-info/
 .venv
 dist/
