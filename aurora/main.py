@@ -31,6 +31,7 @@ import aurora.settings as settings
 from aurora.config.paths import state_path, is_updating_path, cache_path
 from aurora.daemon import check_updates
 from aurora.status import main as status_main
+from aurora.check import main as check_main
 
 from datetime import datetime, timedelta
 
@@ -208,6 +209,10 @@ def handle_flags():
     if "status" in sys.argv:
         status_main()
         exit(0)
+    if "check" in sys.argv:
+        check_main()
+        exit(0)
+        
         
     if "--no-update" in sys.argv:
         settings.ask_update = False
