@@ -28,19 +28,27 @@ import random
 from rich import print
 import aurora.settings as settings
 
-from aurora.config.paths import state_path, is_updating_path
+from aurora.config.paths import state_path, is_updating_path, cache_path
 from aurora.daemon import check_updates
 from aurora.status import main as status_main
+
+from datetime import datetime, timedelta
 
 
 updateable_packages = 0
 is_updating = False
 
+cooldown_file = cache_path / "update-cooldown"
+
 # ---------------- FUNCTIONS ----------------
 def update():
     global updateable_packages
     global is_updating
+    global cooldown_file
+    
     distro = get_distro()
+    
+    cooldown_file.unlink(missing_ok=True)
 
     is_updating = True
     with open(is_updating_path, "w") as f:
@@ -88,10 +96,28 @@ def sas_response():
         print("Aurora:", random.choice(responses.stage_5))
     
 
+def should_ask_update():
+    global cooldown_file
+    
+    if not cooldown_file.is_file():
+        return True
+    
+    with open(cooldown_file, "r") as f:
+        cooldown_string = f.read().strip()
+        
+    cooldown_time = datetime.fromisoformat(cooldown_string)
+    current_time = datetime.now()
+    
+    if current_time >= cooldown_time:
+        return True
+    
+    return False
+        
 
 def update_handler():
     """Handle user prompts or forced updates based on load and stage."""
     global is_updating
+    global cooldown_file
     sas_response()
 
     if is_updating_path.is_file():
@@ -99,6 +125,9 @@ def update_handler():
         
     if updateable_packages < settings.normal_threshold:
         # Minimal load, no update required
+        return
+    
+    if not should_ask_update():
         return
 
     elif updateable_packages < settings.high_threshold and settings.ask_update and not is_updating:
@@ -113,7 +142,15 @@ def update_handler():
                     update()
                     with open(state_path, "w") as f:
                         f.write("0")
-                break
+                else:
+                    cooldown_file.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    with open(cooldown_file, "w") as f:
+                        current_time = datetime.now()
+                        cooldown_until = current_time + timedelta(seconds=settings.cooldown_time)
+                        
+                        f.write(str(cooldown_until))
+                    break
             else:
                 print("Aurora:", random.choice(responses.invalid_input_responses))
 
