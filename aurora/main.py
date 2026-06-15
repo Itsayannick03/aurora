@@ -28,7 +28,7 @@ import random
 from rich import print
 import aurora.settings as settings
 
-from aurora.config.paths import state_path, is_updating_path, cache_path
+from aurora.config.paths import state_path, is_updating_path, cooldown_file
 from aurora.daemon import check_updates
 from aurora.status import main as status_main
 from aurora.check import main as check_main
@@ -37,11 +37,11 @@ from datetime import datetime, timedelta
 
 import json
 
+distro = get_distro()
 
 updateable_packages = 0
 is_updating = False
 
-cooldown_file = cache_path / "update-cooldown.json"
 
 # ---------------- FUNCTIONS ----------------
 def update():
@@ -194,6 +194,40 @@ def update_handler():
         update()
         with open(state_path, "w") as f:
             f.write("0")
+            
+def print_pkgs():
+    global distro
+    
+    pkg_list = distro.get_pkg_list()
+    
+    for pkg in pkg_list:
+        print(f"    - {pkg}")
+
+def update_flag():
+    global distro
+    
+    print("Aurora Update")
+    print("─────────────")
+    print("Checking for available updates...\n")
+    
+    check_updates()
+    
+    pkg_count = distro.check_updates()
+    print(f"{pkg_count} Packages can be upgraded:")
+    print_pkgs()
+    
+    
+    print("\nPreparing upgrades...\n")
+    inpt = input("Proceed with update? [y/N] ").strip().lower()
+    if inpt == "y":
+        print("Starting system update...\n")
+        update()
+        
+        print("Update complete")
+        return
+    else:
+        print("Update cancelled.")
+        return 
 
 
 def handle_flags():
@@ -210,7 +244,11 @@ def handle_flags():
         status_main()
         exit(0)
     if "check" in sys.argv:
+        check_updates()
         check_main()
+        exit(0)
+    if "update" in sys.argv:
+        update_flag()
         exit(0)
         
         
