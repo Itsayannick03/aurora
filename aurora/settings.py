@@ -41,3 +41,7 @@ install_shell_hook = False # Set to true if you want Aurora to be installed into
 daemon_timer = 600 # Daemon timer interval in seconds (default 10 minutes)
 boot_timer = 0 # Daemon on boot timer, how long after boot should timer run (0 seconds by default)
 
+base_cooldown_time = 5 * 60 # Cooldown timer in seconds (default 5 minutes)
+
+max_cooldown = 24 * 60 * 60 # 1 day
+
