@@ -28,7 +28,7 @@ import random
 from rich import print
 import aurora.settings as settings
 
-from aurora.config.paths import state_path, is_updating_path, cache_path, cooldown_file
+from aurora.config.paths import state_path, is_updating_path, cooldown_file
 from aurora.daemon import check_updates
 from aurora.status import main as status_main
 from aurora.check import main as check_main
