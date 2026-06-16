@@ -17,6 +17,7 @@
 
 # TO RUN python -m aurora.main
 import os
+import platform
 import sys
 sys.path.append("/usr/lib/aurora")
 import aurora.responses as responses
@@ -28,7 +29,7 @@ import random
 from rich import print
 import aurora.settings as settings
 
-from aurora.config.paths import state_path, is_updating_path, cooldown_file
+from aurora.config.paths import state_path, is_updating_path, cooldown_file, system_info_path, performance_cache_path
 from aurora.daemon import check_updates
 from aurora.status import main as status_main
 from aurora.check import main as check_main
@@ -36,6 +37,13 @@ from aurora.check import main as check_main
 from datetime import datetime, timedelta
 
 import json
+import psutil
+import shutil
+
+import tomllib
+from pathlib import Path
+
+
 
 distro = get_distro()
 
@@ -262,6 +270,41 @@ def handle_flags():
         except OSError:
             print("Couldnt fetch")
             
+def get_package_manager():
+    if shutil.which("pacman"):
+        return "pacman"
+    if shutil.which("apt"):
+        return "apt"
+    if shutil.which("dnf"):
+        return "dnf"
+    if shutil.which("zypper"):
+        return "zypper"
+    if shutil.which("apk"):
+        return "apk"
+    return "unknown"
+
+def bytes_to_gb(value):
+    return round(value / (1024 ** 3), 2)
+
+
+def get_os_info():
+    info = {}
+
+    with open("/etc/os-release") as f:
+        for line in f:
+            key, value = line.strip().split("=", 1)
+            info[key] = value.strip('"')
+
+    return info
+
+def get_aurora_version():
+    pyproject_path = Path("pyproject.toml")
+
+    with open(pyproject_path, "rb") as f:
+        data = tomllib.load(f)
+
+    return data["project"]["version"]
+            
      
 
 def main():
@@ -285,7 +328,75 @@ def main():
         subprocess.run(["systemctl", "--user", "start", "aurora.service"])
         with open(state_path, "r") as f:        
             updateable_packages = int(f.read().strip())
+            
+    try:
+        with open(system_info_path, "r") as f:
+            data = json.load(f)
+        os_name = data["os_name"]
+        kernal = data["kernal"]
+        package_manager = data["package_manager"]
+        aurora_version = data["aurora_version"]
+        
+    except FileNotFoundError:
+        # if the files doesnt exist we create it by updateing it
+        system_info_path.parent.mkdir(parents=True, exist_ok=True)
+        os_info = get_os_info()
+        
+        os_name = os_info["PRETTY_NAME"]
+        kernal = platform.release()
+        package_manager = get_package_manager()
+        aurora_version = get_aurora_version()
+        
+        data = {
+            "os_name": os_name,
+            "kernal": kernal,
+            "package_manager": package_manager,
+            "aurora_version": aurora_version
+        }
+        
+        with open(system_info_path, "w") as f:
+            json.dump(data, f, indent=4)
+    try:
+        with open(performance_cache_path, "r") as f:
+            data = json.load(f)
+            
+        ram_total = data["ram_total"]
+        ram_used = data["ram_used"]
+        ram_percent = data["ram_percent"]
+        cpu_usage = data["cpu_usage"]
+    except FileNotFoundError:
+        performance_cache_path.parent.mkdir(parents=True, exist_ok=True)
+
+        cpu_usage = psutil.cpu_percent(interval=1)
+        ram = psutil.virtual_memory()
+        
+        ram_total = bytes_to_gb(ram.total)
+        ram_used = bytes_to_gb(ram.used)
+        ram_percent = ram.percent
+        
+        data = {
+            "ram_total": ram_total,
+            "ram_used": ram_used,
+            "ram_percent": ram_percent,
+            "cpu_usage": cpu_usage
+        }
+        
+        with open(performance_cache_path, "w") as f:
+            json.dump(data, f, indent=4)
+            
+  
     
+    print("Aurora status")
+    print("──────────────")
+    print("System")
+    print(f"    OS:{os_name}" )
+    print(f"    Kernal: {kernal}")
+    print(f"    Package manager: {package_manager}")
+    print(f"    Aurora version: {aurora_version}")
+    print("Performance")
+    print(f"    CPU usage: {cpu_usage}%")
+    print(f"    RAM used: {ram_used}gb / {ram_total}gb ({ram_percent}%)")
+    print("Updates")
     package_count(updateable_packages)
     update_handler()
 

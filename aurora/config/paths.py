@@ -8,4 +8,6 @@ servicePath = Path("/etc/systemd/user/aurora.service")
 timerPath = Path("/etc/systemd/user/aurora.timer")
 pacman_hook_path = Path("/etc/pacman.d/hooks")
 cache_path = Path(".cache/aurora/")
+system_info_path = Path(".cache/aurora/system.json")
+performance_cache_path = Path(".cache/aurora/performance.json")
 cooldown_file = cache_path / "update-cooldown.json"

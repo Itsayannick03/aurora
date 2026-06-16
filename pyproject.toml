@@ -4,11 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aurora"
-version = "1.0.0"
+version = "1.1.0"
 description = "Aurora package update assistant"
 requires-python = ">=3.10"
 dependencies = [
     "rich",
+    "psutil"
 ]
 license = "GPL-3.0-or-later"
 
