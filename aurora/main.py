@@ -116,6 +116,24 @@ def load_cooldown_data():
 
     with open(cooldown_file, "r") as f:
         return json.load(f)
+
+def get_cooldown():
+    data = load_cooldown_data()
+
+    cooldown_until = data.get("cooldown_until")
+
+    if cooldown_until is None:
+        return None
+
+    cooldown_until = datetime.fromisoformat(cooldown_until)
+    current_time = datetime.now()
+
+    cooldown = cooldown_until - current_time
+
+    if cooldown.total_seconds() <= 0:
+        return None
+
+    return cooldown
     
 
 def save_cooldown_data(data):
@@ -314,7 +332,7 @@ def main():
     try:
         with open(state_path, "r") as f:
             try:
-                updateable_packages = int(f.read().strip())
+                updateable_packages = 45#int(f.read().strip())
             except ValueError:
                 print("Aurora couldn't fetch updateable packages")
                 exit(1)
@@ -356,6 +374,7 @@ def main():
         
         with open(system_info_path, "w") as f:
             json.dump(data, f, indent=4)
+            
     try:
         with open(performance_cache_path, "r") as f:
             data = json.load(f)
@@ -383,19 +402,30 @@ def main():
         
         with open(performance_cache_path, "w") as f:
             json.dump(data, f, indent=4)
-            
-  
+    
+    cooldown = get_cooldown()
+    if cooldown is not None:
+        seconds_left = int(cooldown.total_seconds())
+        minutes = seconds_left // 60
+        seconds = seconds_left % 60
     
     print("Aurora status")
     print("──────────────")
     print("System")
-    print(f"    OS:{os_name}" )
+    print(f"    OS: {os_name}" )
     print(f"    Kernal: {kernal}")
-    print(f"    Package manager: {package_manager}")
-    print("    Aurora version: 1.1.0")
+    print(f"    Package manager: {package_manager.upper()}")
+    print()
     print("Performance")
     print(f"    CPU usage: {cpu_usage}%")
     print(f"    RAM used: {ram_used}gb / {ram_total}gb ({ram_percent}%)")
+    print()
+    print("Aurora")
+    print("    Aurora version: 1.1.0")
+    print(f"    Mode: {'Passive' if settings.ask_update else 'Active'}")
+    print(f"    Auto Update: {'[green]Enabled[/green]' if settings.auto_update else '[red]Disabled[/red]'}")
+    print(f"    Cooldown: {'inactive' if cooldown is None else f'{minutes} minutes {seconds} seconds'}")
+    print()
     print("Updates")
     package_count(updateable_packages)
     update_handler()
