@@ -30,7 +30,7 @@ from rich import print
 import aurora.settings as settings
 
 from aurora.config.paths import state_path, is_updating_path, cooldown_file, system_info_path, performance_cache_path
-from aurora.daemon import check_updates
+from aurora.daemon import check_updates, update_cache
 from aurora.status import main as status_main
 from aurora.check import main as check_main
 
@@ -351,6 +351,7 @@ def main():
     except FileNotFoundError:
         # if the files doesnt exist we create it by updateing it
         try:
+            update_cache()
             updateable_packages = check_updates()
         except Exception as e:
             print("Couldn't fetch updates:", e)
