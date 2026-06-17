@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 is_updating_path = Path("/tmp/aurora-is-updating")
-state_path = Path("/tmp/aurora.log")
+state_path = Path("/tmp/aurora.json")
 important_updates_path = Path("/tmp/important-updates.json")
 servicePath = Path("/etc/systemd/user/aurora.service")
 timerPath = Path("/etc/systemd/user/aurora.timer")

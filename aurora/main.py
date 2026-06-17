@@ -45,6 +45,9 @@ from pathlib import Path
 
 from aurora.logos import AURORA_LOGO, AURORA_LOGO_LARGE
 
+import getpass
+
+
 
 
 distro = get_distro()
@@ -324,6 +327,10 @@ def get_aurora_version():
         data = tomllib.load(f)
 
     return data["project"]["version"]
+
+def print_packages(package_list):
+    for package in package_list:
+        print(f"        {str(package)}")
             
      
 
@@ -334,7 +341,10 @@ def main():
     try:
         with open(state_path, "r") as f:
             try:
-                updateable_packages = int(f.read().strip())
+                data = json.load(f)
+                updateable_packages = int(data["package_count"])
+
+                package_list = data["updates_list"]
             except ValueError:
                 print("Aurora couldn't fetch updateable packages")
                 exit(1)
@@ -427,7 +437,10 @@ def main():
         minutes = seconds_left // 60
         seconds = seconds_left % 60
 
+    user = getpass.getuser()
+
     print(AURORA_LOGO_LARGE)
+    
     print("System")
     print(f"    OS: {os_name}" )
     print(f"    Kernal: {kernal}")
@@ -444,9 +457,15 @@ def main():
     print(f"    Auto Update: {'[green]Enabled[/green]' if settings.auto_update else '[red]Disabled[/red]'}")
     print(f"    Cooldown: {'inactive' if cooldown is None else f'{minutes} minutes {seconds} seconds'}")
     print()
-    print("Updates")
-    print(" ",end="")
+    print("Packages")
+    print("    Updates:")
+    print("", end="    ")
     package_count(updateable_packages)
+    print("    Pending:")
+    print_packages(package_list)
+    
+    print(" ",end="")
+    
     print()
     update_handler()
 
