@@ -43,6 +43,8 @@ import shutil
 import tomllib
 from pathlib import Path
 
+from aurora.logos import AURORA_LOGO, AURORA_LOGO_LARGE
+
 
 
 distro = get_distro()
@@ -332,7 +334,7 @@ def main():
     try:
         with open(state_path, "r") as f:
             try:
-                updateable_packages = 45#int(f.read().strip())
+                updateable_packages = int(f.read().strip())
             except ValueError:
                 print("Aurora couldn't fetch updateable packages")
                 exit(1)
@@ -374,20 +376,32 @@ def main():
         
         with open(system_info_path, "w") as f:
             json.dump(data, f, indent=4)
-            
+
     try:
         with open(performance_cache_path, "r") as f:
             data = json.load(f)
-            
+        
+        cpu_usage = data["cpu_usage"]
+
         ram_total = data["ram_total"]
         ram_used = data["ram_used"]
         ram_percent = data["ram_percent"]
-        cpu_usage = data["cpu_usage"]
+
+        disk_used = data["disk_used"]
+        disk_total = data["disk_total"]
+        disk_percent = data["disk_percent"]
+
     except FileNotFoundError:
         performance_cache_path.parent.mkdir(parents=True, exist_ok=True)
 
         cpu_usage = psutil.cpu_percent(interval=1)
         ram = psutil.virtual_memory()
+        disk_total_mb, disk_used_mb, disk_free_mb = shutil.disk_usage("/")
+
+        disk_used = bytes_to_gb(disk_used_mb)
+        disk_total = bytes_to_gb(disk_total_mb)
+        disk_percent = float((disk_used_mb / disk_total_mb) * 100)
+
         
         ram_total = bytes_to_gb(ram.total)
         ram_used = bytes_to_gb(ram.used)
@@ -397,7 +411,11 @@ def main():
             "ram_total": ram_total,
             "ram_used": ram_used,
             "ram_percent": ram_percent,
-            "cpu_usage": cpu_usage
+            "cpu_usage": cpu_usage,
+            "disk_used": disk_used,
+            "disk_total": disk_total,
+            "disk_percent": disk_percent
+
         }
         
         with open(performance_cache_path, "w") as f:
@@ -408,9 +426,8 @@ def main():
         seconds_left = int(cooldown.total_seconds())
         minutes = seconds_left // 60
         seconds = seconds_left % 60
-    
-    print("Aurora status")
-    print("──────────────")
+
+    print(AURORA_LOGO_LARGE)
     print("System")
     print(f"    OS: {os_name}" )
     print(f"    Kernal: {kernal}")
@@ -419,6 +436,7 @@ def main():
     print("Performance")
     print(f"    CPU usage: {cpu_usage}%")
     print(f"    RAM used: {ram_used}gb / {ram_total}gb ({ram_percent}%)")
+    print(f"    Disk Used: {disk_used}gb / {disk_total}gb ({disk_percent:.1f}%)")
     print()
     print("Aurora")
     print("    Aurora version: 1.1.0")
@@ -427,7 +445,9 @@ def main():
     print(f"    Cooldown: {'inactive' if cooldown is None else f'{minutes} minutes {seconds} seconds'}")
     print()
     print("Updates")
+    print(" ",end="")
     package_count(updateable_packages)
+    print()
     update_handler()
 
 if __name__ == "__main__":
