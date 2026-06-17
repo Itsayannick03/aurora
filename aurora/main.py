@@ -87,24 +87,24 @@ def package_count(updateable_packages):
     else:
         color = "dark_red"
 
-    print(f"[{color}]{updateable_packages}[/{color}] packages require attention.")
+    print(f"    [{color}]{updateable_packages}[/{color}] packages require attention.")
 
 
 def sas_response():
     """Print sassy response according to update stage and whether we ask today."""
     
     if updateable_packages == 0:
-            print("Aurora:", random.choice(responses.stage_0))
+            print("Recomendation:", random.choice(responses.stage_0))
     elif updateable_packages < settings.normal_threshold:
-            print("Aurora:", random.choice(responses.stage_1))
+            print("Recomendation:", random.choice(responses.stage_1))
     elif updateable_packages < settings.moderate_threshold:
-            print("Aurora:", random.choice(responses.stage_2))
+            print("Recomendation:", random.choice(responses.stage_2))
     elif updateable_packages < settings.high_threshold:
-            print("Aurora:", random.choice(responses.stage_3))
+            print("Recomendation:", random.choice(responses.stage_3))
     elif updateable_packages < settings.critical_threshold:
-            print("Aurora:", random.choice(responses.stage_4))
+            print("Recomendation:", random.choice(responses.stage_4))
     else:
-        print("Aurora:", random.choice(responses.stage_5))
+        print("Recomendation:", random.choice(responses.stage_5))
         
         
 def load_cooldown_data():
@@ -335,7 +335,7 @@ def main():
         os_name = data["os_name"]
         kernal = data["kernal"]
         package_manager = data["package_manager"]
-        aurora_version = data["aurora_version"]
+        #aurora_version = data["aurora_version"]
         
     except FileNotFoundError:
         # if the files doesnt exist we create it by updateing it
@@ -345,13 +345,13 @@ def main():
         os_name = os_info["PRETTY_NAME"]
         kernal = platform.release()
         package_manager = get_package_manager()
-        aurora_version = get_aurora_version()
+        #aurora_version = get_aurora_version()
         
         data = {
             "os_name": os_name,
             "kernal": kernal,
             "package_manager": package_manager,
-            "aurora_version": aurora_version
+            #"aurora_version": aurora_version
         }
         
         with open(system_info_path, "w") as f:
@@ -392,7 +392,7 @@ def main():
     print(f"    OS:{os_name}" )
     print(f"    Kernal: {kernal}")
     print(f"    Package manager: {package_manager}")
-    print(f"    Aurora version: {aurora_version}")
+    print("    Aurora version: 1.1.0")
     print("Performance")
     print(f"    CPU usage: {cpu_usage}%")
     print(f"    RAM used: {ram_used}gb / {ram_total}gb ({ram_percent}%)")
